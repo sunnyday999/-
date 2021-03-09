@@ -1,7 +1,10 @@
 <template>
-  <div>
-    我的信息页面，可以修改密码
-  </div>
+  <v-app>
+    <v-container>
+
+    </v-container>
+
+  </v-app>
 </template>
 
 <script>
@@ -9,11 +12,11 @@ export default {
   name: "My",
   data(){
     return{
-    
+
     };
   },
   methods:{
-  
+
   },
 }
 </script>

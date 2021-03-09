@@ -12,6 +12,9 @@ import axios from 'axios'
 //引入vuex
 import store from "@/vuex/vuex";
 Vue.prototype.$axios=axios
+// 全局消息
+import Message from './components/message/index.js'
+Vue.prototype.$message = Message
 new Vue({
   router,
   vuetify,

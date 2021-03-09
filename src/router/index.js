@@ -15,6 +15,9 @@ import UserMange from "@/views/index/UserMange";
 import MeetingRoomMange from "@/views/index/MeetingRoomMange";
 
 
+import vuex from "@/vuex/vuex";
+import axios from "axios";
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -81,22 +84,43 @@ const router = new VueRouter({
 })
 
 export default router;
-/*每次切换页面的时候就判断下*/
-/*router.beforeEach((to,from,next)=>{
-    // 如果是登录页可访问
+/*/!*每次切换页面的时候就判断下*!/
+router.beforeEach((to,from,next)=>{
+// 如果是登录页可访问
     if (to.name ==='error' || to.name==='login'){
         next();
     }
-    // 如果是其他页面，则要鉴定是否登录,
-    // 假设这里拿到了token，表示登陆过，
-    let item = localStorage.getItem('token');
-    if (true){
-        // 登陆后，对角色进行判断
-        if('')
-
-
+    // 如果是其他页面,先检测是否有token,没有token则跳转到登录页
+    let tokenValue = vuex.state.token.tokenValue;
+    if (tokenValue===undefined || tokenValue===''){
+        next({
+            path: '/login'
+        })
     }
-
+    // 如果是从登录界面过来的且有token
+    if (from.name==='login'){
+        console.log("有token放行")
+        next()
+    }
+    //如果是普通的界面，有token需要检测是否正确
+    axios.post("/user/token", null, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            tokenValue: vuex.state.token.tokenValue,
+        }
+    }).then(r=>{
+        if (r.data.code===200){
+            next()
+        }
+        else{
+            next({
+                path: '/login'
+            })
+        }
+    }).catch(r=>{
+        next({
+            path: '/login'
+        })
+    });
 })*/
-
 

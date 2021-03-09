@@ -353,7 +353,6 @@
             this.$el.onselectstart = function () {
                 return false
             }
-            console.log(this.defaultImg)
         },
     }
 </script>
