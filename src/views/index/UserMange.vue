@@ -23,18 +23,18 @@
             <div class="mt-5 ml-5 text-h6">用户信息表</div>
             <v-spacer></v-spacer>
             <!--搜索框-->
-            <v-text-field v-model="pagination.queryString" append-icon="mdi-magnify" label="在此输入.." dense
+            <v-text-field  v-model="pagination.queryString"  label="在此输入.." dense
                 solo hint="根据学号/学工号或者权限筛选" color="success" class="mt-5"></v-text-field>
-            <v-btn color="success" class="mt-5 ml-5" @click="searchUser">查询</v-btn>
+            <v-btn color="success" elevation="5" class="mt-5 ml-5" @click="searchUser"><i class="fa fa-search"></i> </v-btn>
             <v-spacer></v-spacer>
             <!--新建用户的按钮-->
-            <v-btn color="success" dark class="mt-5" @click="showDialog">新建用户</v-btn>
+            <v-btn color="success" elevation="5" dark class="mt-5" @click="showDialog">新建用户</v-btn>
           </v-toolbar>
         </template>
         <!--操作的按钮-->
         <template v-slot:item.actions="{ item }">
-          <v-btn small color="success" class="mr-2" @click="editItem(item)">修改</v-btn>
-          <v-btn small color="error" @click="deleteItem(item)">删除</v-btn>
+          <v-btn small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
+          <v-btn small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
         </template>
       </v-data-table>
 
@@ -57,8 +57,8 @@
         <v-card-title class="subtitle-1">你确定要删除这个用户吗?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="success"  @click="closeDelete">取消</v-btn>
-          <v-btn color="error"  @click="deleteItemConfirm">删除</v-btn>
+          <v-btn color="success" elevation="5" @click="closeDelete">取消</v-btn>
+          <v-btn color="error" elevation="5"  @click="deleteItemConfirm">删除</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -88,8 +88,8 @@
           <!--新建页面的保存，取消按钮-->
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="error" @click="close">取消</v-btn>
-            <v-btn :disabled="!valid" color="success" @click="save">保存</v-btn>
+            <v-btn color="error" elevation="5" @click="close">取消</v-btn>
+            <v-btn :disabled="!valid" elevation="5" color="success" @click="save">保存</v-btn>
             <v-spacer></v-spacer>
           </v-card-actions>
         </v-card>
@@ -189,9 +189,7 @@ export default {
     },
     // 点击搜索按钮
     searchUser(){
-      this.loading=true;
       this.findPage();
-      this.loading=false;
     },
     // 点击修改按钮
     editItem (item) {
@@ -215,8 +213,7 @@ export default {
 
     // 删除页面的删除按钮
     deleteItemConfirm () {
-      this.loading=true;
-      this.$axios.post("/user/delete?",{id:this.editedItem.id}).then((res)=>{
+      this.$axios.post("/user/delete",{id:this.editedItem.id}).then((res)=>{
         if (res.data.code===200){
           this.$message.success(res.data.data);
         }
@@ -229,7 +226,6 @@ export default {
         this.findPage()
         this.closeDelete()
       });
-      this.loading=false;
     },
 
     // 删除页面的取消按钮
@@ -253,7 +249,6 @@ export default {
 
     // 新建，或者修改 页面的保存
     save () {
-      this.loading=true;
       // 如果是新建的保存
       if (this.editedIndex===-1){
         // 验证表单输入,如果通过，像后端发请求
@@ -282,7 +277,6 @@ export default {
         else{
           this.$message.error("请检查输入的格式是否有问题");
         }
-        this.loading=false;
       }
       // 如果是修改保存
       else{
@@ -333,10 +327,9 @@ export default {
     },
     // 页码变化
     handleCurrentPage(currentPage){
-      this.loading =true;
+
       this.pagination.currentPage =currentPage;
       this.findPage();
-      this.loading=false;
     }
   },
 
