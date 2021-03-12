@@ -116,14 +116,15 @@
       </v-list-item>
 
       <!--下方列表-->
-      <v-list dense nav >
+      <v-list  nav>
         <v-list-item
             v-for="item in user_items"
             :key="item.title"
             link
+            active-class="success white--text"
             :to="item.link"
             @click="title =item.title"
-            color="green"
+            color="success"
         >
           <v-tooltip right >
             <template v-slot:activator="{ on, attrs }">
@@ -137,7 +138,7 @@
             <span>{{ item.title }}</span>
           </v-tooltip>
           <v-list-item-content>
-            <v-list-item-title >{{ item.title }}</v-list-item-title>
+            <v-list-item-title class="white--text body-2" >{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -149,7 +150,6 @@
       </v-container>
     </v-main>
   </v-app>
-
 </template>
 
 <script>
@@ -227,5 +227,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

@@ -1,124 +1,40 @@
 <template>
   <v-app>
     <v-container>
-      <div class="mt-10"/>
       <!--表格-->
       <v-data-table
           :headers="headers"
           :items="dataList"
           sort-by="calories"
-          class="elevation-5"
+          class="elevation-5 mt-10"
           hide-default-footer
           :page.sync="pagination.currentPage"
           :items-per-page="pagination.pageSize"
           :server-items-length="pagination.total"
           :loading="loading"
-          :update:page="handleCurrentPage"
-      >
+          :update:page="handleCurrentPage">
         <!--表格 顶部的工具栏-->
         <template v-slot:top>
-          <v-toolbar
-              flat
-              prominent
-          >
+          <v-toolbar flat prominent>
             <!--展示表格的icon-->
             <v-card class="white--text success  text-center mycard elevation-5 pa-8" >
               <i class="fa  fa-users fa-2x" />
             </v-card>
-            <div class="mt-5 ml-5 text-h6">
-              用户信息表
-            </div>
+            <div class="mt-5 ml-5 text-h6">用户信息表</div>
             <v-spacer></v-spacer>
             <!--搜索框-->
-            <v-text-field
-                v-model="pagination.queryString"
-                append-icon="mdi-magnify"
-                label="在此输入.."
-                dense
-                solo
-                hint="根据学号/学工号或者权限筛选"
-                color="success"
-                class="mt-5"
-            ></v-text-field>
-            <v-btn color="success" class="mt-5 ml-5" @click="searchUser">
-              查询
-            </v-btn>
+            <v-text-field v-model="pagination.queryString" append-icon="mdi-magnify" label="在此输入.." dense
+                solo hint="根据学号/学工号或者权限筛选" color="success" class="mt-5"></v-text-field>
+            <v-btn color="success" class="mt-5 ml-5" @click="searchUser">查询</v-btn>
             <v-spacer></v-spacer>
-            <!--新建用户的弹出框-->
-            <v-form v-model="valid"    ref="form">
-              <v-dialog v-model="dialog" max-width="400px"
-              >
-                <!--新建用户弹出的按钮-->
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                      color="success"
-                      dark
-                      class="mt-5"
-                      v-bind="attrs"
-                      v-on="on"
-                  >
-                    新建用户
-                  </v-btn>
-                </template>
-                <!--新建页面的title-->
-                <v-card>
-                  <v-card-title>
-                    <span class="headline">{{ formTitle }}</span>
-                  </v-card-title>
-                  <!--新建页面的内容-->
-                  <v-card-text>
-                    <v-container>
-                      <v-text-field v-model="editedItem.username" label="学号/学工号" :rules="usernameRules"></v-text-field>
-                      <v-text-field v-model="editedItem.password" label="密码" :rules="passwordRules"></v-text-field>
-                      <v-radio-group mandatory v-model="editedItem.role" row>
-                        <v-radio color="success" label="普通用户" value="user"></v-radio>
-                        <v-radio color="success" label="管理员" value="admin"></v-radio>
-                      </v-radio-group>
-                    </v-container>
-                  </v-card-text>
-
-                  <!--新建页面的保存，取消按钮-->
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="error" @click="close">取消</v-btn>
-                    <v-btn :disabled="!valid" color="success" @click="save">保存</v-btn>
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-form>
-            <!--删除的弹出页面-->
-            <v-dialog v-model="dialogDelete" max-width="250px">
-              <v-card>
-                <v-card-title class="subtitle-1">你确定要删除这个用户吗?</v-card-title>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="success"  @click="closeDelete">取消</v-btn>
-                  <v-btn color="error"  @click="deleteItemConfirm">删除</v-btn>
-                  <v-spacer></v-spacer>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
+            <!--新建用户的按钮-->
+            <v-btn color="success" dark class="mt-5" @click="showDialog">新建用户</v-btn>
           </v-toolbar>
         </template>
-
         <!--操作的按钮-->
         <template v-slot:item.actions="{ item }">
-          <v-btn
-              small
-              color="success"
-              class="mr-2"
-              @click="editItem(item)"
-          >
-            修改
-          </v-btn>
-          <v-btn
-              small
-              color="error"
-              @click="deleteItem(item)"
-          >
-            删除
-          </v-btn>
+          <v-btn small color="success" class="mr-2" @click="editItem(item)">修改</v-btn>
+          <v-btn small color="error" @click="deleteItem(item)">删除</v-btn>
         </template>
       </v-data-table>
 
@@ -132,8 +48,53 @@
           next-icon="mdi-menu-right"
           @input="handleCurrentPage"
       ></v-pagination>
-    </v-container>
+      <!--回到顶部的按钮-->
 
+    </v-container>
+    <!--删除的弹出页面-->
+    <v-dialog v-model="dialogDelete" max-width="250px"   transition="dialog-top-transition">
+      <v-card>
+        <v-card-title class="subtitle-1">你确定要删除这个用户吗?</v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="success"  @click="closeDelete">取消</v-btn>
+          <v-btn color="error"  @click="deleteItemConfirm">删除</v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!--新建，编辑的弹窗-->
+    <v-form v-model="valid" ref="form">
+      <v-dialog v-model="dialog" max-width="400px" transition="dialog-top-transition">
+        <!--新建页面的title-->
+        <v-card>
+          <v-toolbar class="text-h6" color="success" dark>
+            <v-spacer/>
+            {{ formTitle }}
+            <v-spacer/>
+          </v-toolbar>
+          <!--新建页面的内容-->
+          <v-card-text>
+            <v-container>
+              <v-text-field color="success" v-model="editedItem.username" label="学号/学工号" :rules="usernameRules"></v-text-field>
+              <v-text-field color="success" v-model="editedItem.password" label="密码" :rules="passwordRules"></v-text-field>
+              <v-radio-group mandatory v-model="editedItem.role" row>
+                <v-radio color="success" label="普通用户" value="user"></v-radio>
+                <v-radio color="success" label="管理员" value="admin"></v-radio>
+              </v-radio-group>
+            </v-container>
+          </v-card-text>
+          <!--新建页面的保存，取消按钮-->
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="error" @click="close">取消</v-btn>
+            <v-btn :disabled="!valid" color="success" @click="save">保存</v-btn>
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-form>
   </v-app>
 </template>
 
@@ -156,9 +117,7 @@ export default {
           let pattern = /^[0-9]*$/
           return pattern.test(value)|| '只能是数字'},
       ],
-      passwordRules: [
-        value => !!value || '不能为空',
-      ],
+      passwordRules: [value => !!value || '不能为空'],
       //所有的列信息
       headers: [
         {
@@ -218,7 +177,11 @@ export default {
 
   // 所有的方法
   methods: {
-
+    // 显示弹出框
+    showDialog(){
+      this.dialog =true;
+    },
+    // 页面初始化
     init(){
       this.loading=true;
       this.findPage();
@@ -236,7 +199,6 @@ export default {
       this.editedItem.id =item.id;
       // 修改editedIndex来说明现在是修改
       this.editedIndex = this.dataList.indexOf(item);
-      console.log(this.dataList.indexOf(item));
       // 将此行的数据复制到editedItem，用于Dialog展示，【es6新语法】
       this.editedItem = Object.assign({},item);
       this.dialog =true;

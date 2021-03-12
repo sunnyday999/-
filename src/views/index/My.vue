@@ -1,9 +1,8 @@
 <template>
   <v-app>
-    <v-container>
-
-    </v-container>
-
+    <v-content>
+      sxxx
+    </v-content>
   </v-app>
 </template>
 
@@ -12,12 +11,10 @@ export default {
   name: "My",
   data(){
     return{
-
     };
   },
-  methods:{
-
-  },
+  methods: {
+  }
 }
 </script>
 
