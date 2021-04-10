@@ -4,12 +4,10 @@
     <v-app-bar app flat hide-on-scroll  absolute   >
       <v-app-bar-nav-icon @click="permanent=!permanent;mini=!mini"/>
       <v-list-item-title class="body-1 ml-3">{{ title }}</v-list-item-title>
-
       <v-spacer/>
       <!--消息盒子-->
-      <v-menu  offset-x offset-y
-               transition="slide-y-transition"
-               :close-on-content-click="false">
+      <v-menu   offset-y
+                :close-on-content-click="false">
         <!--消息盒子的按钮-->
         <template v-slot:activator="{ on, attrs }">
           <v-btn icon small large
@@ -96,7 +94,6 @@
         :dark="barColor !== 'rgba(228, 226, 226, 1)'"
         app
         v-model="drawer"
-        bottom
         :mini-variant="mini"
         :permanent="permanent">
       <template v-slot:img="props">
@@ -109,40 +106,81 @@
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="text-center mt-3 text-h6">
-            <strong>会议审批系统</strong>
+            <strong>高校会议审批</strong>
           </v-list-item-title>
           <v-divider class="mt-5"/>
         </v-list-item-content>
       </v-list-item>
 
-      <!--下方列表-->
+      <!--路由列表-->
       <v-list  nav>
-        <v-list-item
-            v-for="item in user_items"
-            :key="item.title"
-            link
-            active-class="success white--text"
-            :to="item.link"
-            @click="title =item.title"
-            color="success"
-        >
-          <v-tooltip right >
-            <template v-slot:activator="{ on, attrs }">
-              <v-icon small
-                      color="white"
-                      class="mr-3"
-                      v-bind="attrs"
-                      v-on="on">
-                {{ item.icon }}</v-icon>
-            </template>
-            <span>{{ item.title }}</span>
-          </v-tooltip>
-          <v-list-item-content>
-            <v-list-item-title class="white--text body-2" >{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+        <div v-for="item in  menuList" :key="item.id">
+          <!--如果没有子路由-->
+          <div v-if="item.items.length===0">
+            <v-list-item
+                @click="title = item.title"
+                :to="item.path"
+                active-class="success white--text"
+                color="success"
+            >
+              <!--二级icon-->
+              <v-icon
+                  small
+                  color="white"
+                  class="mr-3">{{ item.icon }}</v-icon>
+              <v-list-item-content
+                  class="white--text">
+                {{item.title}}
+              </v-list-item-content>
+            </v-list-item>
+          </div>
+          <!--如果有子路由-->
+          <div v-else>
+            <v-list-group
+                @click="title = item.title"
+                append-icon="mdi-menu-up"
+                color="success"
+            >
+              <!--icon-->
+              <template v-slot:activator>
+                <v-icon
+                    small
+                    color="white"
+                    class="mr-3">
+                  {{item.icon}}
+                </v-icon>
+                <!--title-->
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.title"></v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <!--二级菜单-->
+              <v-list-item
+                  @click="title = item.title +' > '+subItem.title "
+                  v-for="subItem in item.items"
+                  :key="subItem.id"
+                  :to="item.path + subItem.path"
+                  active-class="success white--text"
+                  color="success"
+                  dense
+              >
+                <!--二级icon-->
+                <v-icon
+                    small
+                    color="white"
+                    class="mr-3 ml-5">{{ subItem.icon }}</v-icon>
+                <v-list-item-content
+                    class="white--text">
+                  {{subItem.title}}
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-group>
+          </div>
+        </div>
       </v-list>
     </v-navigation-drawer>
+
+
     <!--主页-->
     <v-main app>
       <v-container>
@@ -162,23 +200,34 @@ export default {
       mini: false,     // 默认不是mini
       permanent:true,  // 默认是侧栏展开
       title: "首页", // 默认首页
-      user_items: [
-        { title: '首页', icon: 'fa fa-home',link:'/home' },
-        { title: '会议管理', icon: 'fa fa-briefcase',link:'/meetingmange' },
-        { title: '会议室管理', icon: 'fa fa-home',link:'/meetingroommange' },
-        { title: '用户管理', icon: 'fa fa-users',link:'/usermange' },
-        { title: '消息管理', icon: 'fa fa-comments',link:'/messagemange' },
-        { title: '申报会议', icon: 'fa fa-pencil-square',link: '/applymetting' },
-        { title: '我的', icon: 'fa fa-user-circle-o',link: '/my' },
-        { title: '我的消息', icon: 'fa fa-commenting',link: '/message' },
+      //后台拿到的列表
+      menuList: [
+        { id:'1',title: '首页', icon: 'fa fa-home',path:'/home',items: []},
+        { id:'2',title: '会议管理', icon: 'fa fa-briefcase',path:'/meeting',
+          items:[
+            {title: '会议列表', icon: 'fa fa-briefcase',path:'/meetingList' },
+            {title: '会议室列表', icon: 'fa fa-home',path:'/meetingRoomList' },
+            {title: '院系列表', icon: 'fa fa-university',path:'/facultyList' },
+          ]},
+        { id:'3',title: '用户管理', icon: 'fa fa-users',path:'/user',
+          items:[
+            {title: '角色列表', icon: 'fa fa-address-book-o',path:'/roleList'},
+            {title: '用户列表', icon: 'fa fa-users',path:'/userList'},
+            {title: '管理员列表', icon: 'fa fa-user-circle-o',path:'/adminList'},
+          ]},
+        { id:'4', title: '消息管理', icon: 'fa fa-comments',path:'#',items:[]},
+        { id:'5',title: '我的', icon: 'fa fa-user-circle-o',path: '/my',
+          items:[
+            {title: '我的会议', icon: 'fa fa-pencil-square',path: '/myMeeting' },
+            {title: '我的消息', icon: 'fa fa-commenting',path: '/myMessage' },
+            {title: '我的信息', icon: 'fa fa-address-card-o',path: '/myInfo'},
+          ]},
       ],
       // 用户消息相关
       readMessageNum: 1,
       unreadMessageNum: 10,
-      items:[
-
-      ],
       barColor: 'rgba(0, 0, 0, 0.7), rgba(0, 0, 0,0.7)',
+      items: [],
       // 用户导航相关
       user_menu: [
         { title: '我的信息',icon: 'fa fa-home'},
@@ -187,9 +236,17 @@ export default {
     };
   },
   created() {
-/*    this.initMenu();*/
+    this.initMenu();
   },
   methods:{
+    //获取菜单信息
+    initMenu(){
+      this.$axios.post("/menu/findAllMenu").then((res)=>{
+        if (res.data.code===200){
+          this.$store.commit("setMenuList",res.data.data);
+        }
+      });
+    },
     //我的信息
     myInfo(){
 
@@ -198,30 +255,6 @@ export default {
     signOut(){
 
     },
-    // 初始化菜单
-    initMenu(){
-      let tokenName = this.$store.state.token.tokenName;
-      if (tokenName === 'satoken-admin'){
-        this.user_items=[
-          { title: '首页', icon: 'fa fa-home',link:'/home' },
-          { title: '会议管理', icon: 'fa fa-briefcase',link:'/meetingmange' },
-          { title: '会议室管理', icon: 'fa fa-home',link:'/meetingroommange' },
-          { title: '用户管理', icon: 'fa fa-users',link:'/usermange' },
-          { title: '消息管理', icon: 'fa fa-comments',link:'/messagemange' },
-          { title: '申报会议', icon: 'fa fa-pencil-square',link: '/applymetting' },
-          { title: '我的', icon: 'fa fa-user-circle-o',link: '/my' },
-          { title: '我的消息', icon: 'fa fa-commenting',link: '/message' },
-        ]
-      }
-      else{
-        this.user_items= [
-          { title: '首页', icon: 'fa fa-home',link:'/home' },
-          { title: '申报会议', icon: 'fa fa-pencil-square',link: '/applymetting' },
-          { title: '我的', icon: 'fa fa-user-circle-o',link: '/my' },
-          { title: '我的消息', icon: 'fa fa-commenting',link: '/message' },
-        ];
-      }
-    }
   },
 }
 </script>

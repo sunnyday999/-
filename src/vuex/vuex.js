@@ -12,10 +12,16 @@ const store =new Vuex.Store({
         token: {
             tokenName: '',
             tokenValue: '',
-        }
+        },
+        // 全部的菜单信息
+        menuList: [],
     },
     // 修改共享数据的方法
     mutations:{
+        //给菜单赋值
+        setMenuList(state,menuList){
+            state.menuList = menuList;
+        },
         //给tokenName赋值
         setTokenName(state,tokenName){
             state.token.tokenName = tokenName;

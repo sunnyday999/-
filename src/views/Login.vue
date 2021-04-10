@@ -2,9 +2,11 @@
   <v-app>
     <div class="background">
       <div class="color">
+        <v-menu  transition="scroll-y-transition">
+        </v-menu>
         <v-card class="login">
           <!--顶部logo-->
-          <v-card class="white--text success mycard text-center mb-5 pa-7">
+          <v-card class="white--text success mycard text-center mb-5 pa-7 elevation-5">
             <div class="text-h6">
               <strong>用户登录</strong>
             </div>
@@ -12,12 +14,16 @@
           <!--下方输入框-->
           <v-container>
             <v-text-field
-                label="学号/学工号"
+                prepend-icon="mdi mdi-face"
+                color="success"
+                label="学工号"
                 type="text"
                 v-model="username"
                 :rules="usernameRules"
             />
             <v-text-field
+                prepend-icon="mdi mdi-lock-outline"
+                color="success"
                 label="密码"
                 type="password"
                 v-model="password"
@@ -85,7 +91,7 @@ export default {
     },
     // 验证成功的回调函数
     success(params){
-      this.$axios.post("/user/verify",params)
+      this.$axios.post("/login/verify",params)
           .then((response)=>{
             // 如果通过二次验证，则验证账号密码
             if (response.data.repCode ==='0000'){
@@ -106,7 +112,7 @@ export default {
     },
     //登录
     login(){
-      this.$axios.post("/user/login",{
+      this.$axios.post("/login/login",{
         username: this.username,
         password: this.password
       })

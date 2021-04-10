@@ -2,21 +2,28 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from "@/views/Login"
 import Index from "@/views/Index"
-// user
+//home
 import Home from "@/views/index/Home";
-import ApplyMeeting from "@/views/index/ApplyMeeting";
-import My from "@/views/index/My";
-import Error from "@/views/index/Error";
-import Message from "@/views/index/Message";
-// admin
-import MeetingMange from "@/views/index/MeetingMange";
-import MessageMange from "@/views/index/MessageMange";
-import UserMange from "@/views/index/UserMange";
-import MeetingRoomMange from "@/views/index/MeetingRoomMange";
+// meeting
+import MeetingList from "@/views/index/meeting/MeetingList";
+import MeetingRoomList from "@/views/index/meeting/MeetingRoomList";
+import FacultyList from "@/views/index/meeting/FacultyList";
+
+// user
+import RoleList from "@/views/index/user/RoleList";
+import UserList from "@/views/index/user/UserList";
+import AdminList from "@/views/index/user/AdminList";
+
+//my
+import MyMeeting from "@/views/index/my/MyMeeting";
+import MyMessage from "@/views/index/my/MyMessage";
+import MyInfo from "@/views/index/my/MyInfo";
+
 
 
 import vuex from "@/vuex/vuex";
 import axios from "axios";
+import * as path from "path";
 
 Vue.use(VueRouter)
 
@@ -26,57 +33,30 @@ const routes = [
         name: 'index',
         component: Index,
         children:[
+            {path: '/home', name: 'home', component: Home},
+            {path: '/meeting/meetingList', name: 'meetingList', component: MeetingList},
             {
-                path: '/home',
-                name: 'home',
-                component: Home
+                path: '/meeting/meetingRoomList',
+                name: 'meetingRoomList',
+                component: MeetingRoomList,
             },
-            {
-                path: '/applymetting',
-                name: 'applymetting',
-                component: ApplyMeeting
-            },
-            {
-                path: '/my',
-                name: 'my',
-                component: My
-            },
-            {
-                path: '/message',
-                name: 'message',
-                component: Message
-            },
-            {
-                path: '/meetingmange',
-                name: 'meetingmange',
-                component: MeetingMange
-            },
-            {
-                path: '/meetingroommange',
-                name: 'meetingroommange',
-                component: MeetingRoomMange
-            },
-            {
-                path: '/usermange',
-                name: 'usermange',
-                component: UserMange
-            },
-            {
-                path: '/messagemange',
-                name: 'messagemange',
-                component: MessageMange
-            },
-        ]},
-    {
-        path: '/login',
-        name:'login',
-        component: Login
+            {path: '/meeting/facultyList', name: 'facultyList', component: FacultyList},
+
+            {path: '/user/roleList', name: 'roleList', component: RoleList},
+            {path: '/user/userList', name: 'userList', component: UserList},
+            {path: '/user/adminList', name: 'adminList', component: AdminList},
+
+            {path: '/my/myInfo', name: 'myInfo', component: MyInfo},
+            {path: '/my/myMessage', name: 'myMessage', component: MyMessage},
+            {path: '/my/myMeeting', name: 'myMeeting', component: MyMeeting},
+
+        ]
     },
     {
-        path: '*',
-        name: 'error',
-        component: Error
-    }
+        path: '/login',
+        name: 'login',
+        component: Login
+    },
 ]
 
 const router = new VueRouter({

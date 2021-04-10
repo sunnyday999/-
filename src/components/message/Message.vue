@@ -79,7 +79,7 @@ export default {
   overflow: hidden;
   padding: 15px 15px 15px 20px;
   display: flex;
-  align-items: center
+  align-items: center;
 }
 
 .message--success {

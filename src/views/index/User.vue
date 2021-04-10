@@ -24,7 +24,7 @@
             <v-spacer></v-spacer>
             <!--搜索框-->
             <v-text-field  v-model="pagination.queryString"  label="在此输入.." dense
-                solo hint="根据学号/学工号或者权限筛选" color="success" class="mt-5"></v-text-field>
+                solo hint="根据学工号，院系，权限筛选" color="success" class="mt-5"></v-text-field>
             <v-btn color="success" elevation="5" class="mt-5 ml-5" @click="searchUser"><i class="fa fa-search"></i> </v-btn>
             <v-spacer></v-spacer>
             <!--新建用户的按钮-->
@@ -35,6 +35,15 @@
         <template v-slot:item.actions="{ item }">
           <v-btn small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
           <v-btn small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
+        </template>
+        <!--用户权限的显示样式-->
+        <template v-slot:item.role="{ item }">
+          <div v-if="item.role==='user'">
+            <v-chip class="elevation-5"  color="success" label>user</v-chip>
+          </div>
+          <div v-if="item.role==='admin' ">
+            <v-chip class="elevation-5" color="warning" label>admin</v-chip>
+          </div>
         </template>
       </v-data-table>
 
@@ -77,8 +86,16 @@
           <!--新建页面的内容-->
           <v-card-text>
             <v-container>
-              <v-text-field color="success" v-model="editedItem.username" label="学号/学工号" :rules="usernameRules"></v-text-field>
+              <v-text-field color="success" v-model="editedItem.username" label="学号/学工号" :rules="usernameRules" :click="click"></v-text-field>
               <v-text-field color="success" v-model="editedItem.password" label="密码" :rules="passwordRules"></v-text-field>
+              <v-select
+                  v-model="editedItem.faculty"
+                  menu-props="auto"
+                  color="success"
+                  :items="faculty"
+                  label="院系"
+                  :rules="facultyRules"
+              ></v-select>
               <v-radio-group mandatory v-model="editedItem.role" row>
                 <v-radio color="success" label="普通用户" value="user"></v-radio>
                 <v-radio color="success" label="管理员" value="admin"></v-radio>
@@ -89,7 +106,7 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="error" elevation="5" @click="close">取消</v-btn>
-            <v-btn :disabled="!valid" elevation="5" color="success" @click="save">保存</v-btn>
+            <v-btn :disabled="!valid" elevation="5" :loading="saveLoading" color="success" @click="save">保存</v-btn>
             <v-spacer></v-spacer>
           </v-card-actions>
         </v-card>
@@ -100,7 +117,7 @@
 
 <script>
 export default {
-  name: "UserAdmin",
+  name: "User",
   data(){
     return{
       // 编辑,或者修改页面的表单是否通过验证
@@ -110,6 +127,8 @@ export default {
       dialogDelete: false,
       editedIndex: -1, // 用于判断是否是新建，还是修改
       loading: false,  // 是否展示加载样式
+      // 保存按钮的样式
+      saveLoading: false,
       // 输入框规则
       usernameRules: [
         value => !!value || '不能为空',
@@ -118,20 +137,28 @@ export default {
           return pattern.test(value)|| '只能是数字'},
       ],
       passwordRules: [value => !!value || '不能为空'],
+      facultyRules: [value => !!value || '不能为空'],
+      //存放学院信息
+      faculty: [],
       //所有的列信息
       headers: [
         {
-          text: '学号/学工号',
+          text: '学工号',
           align: 'center',
           sortable: false, // 不可排序
           class: 'green--text subtitle-1',
           value: 'username',
         },
         { text: '密码',
-          align: 'start',
+          align: 'center',
           sortable: false,
           class: 'green--text subtitle-1',
           value: 'password' },
+        { text: '所属院系',
+          align: 'center',
+          sortable: false,
+          class: 'green--text subtitle-1',
+          value: 'faculty.name' },
         { text: '用户权限',
           align: 'center',
           sortable: false,
@@ -160,12 +187,14 @@ export default {
         id: '',
         username: '',
         password: '',
+        faculty: '',
         role: '',
       },
       // 点击清空时候赋值
       defaultItem: {
         username: '',
         password: '',
+        faculty: '',
         role: '',
       },
     };
@@ -177,9 +206,24 @@ export default {
 
   // 所有的方法
   methods: {
+    // 新建页面用户输入学工号后的事件
+    click(){
+      console.log("xxxx")
+    },
     // 显示弹出框
     showDialog(){
-      this.dialog =true;
+      // 查询学院信息
+      this.$axios.post("/faculty/findFacultyNameForTeach").then((res)=> {
+        if (res.data.code === 200) {
+          this.faculty=res.data.data;
+          this.dialog =true;
+        }
+        else {
+          this.$message.error(res.data.data);
+        }
+      }).catch(()=>{
+        this.$message.error("查询院系信息失败请检查网络")
+      })
     },
     // 页面初始化
     init(){
@@ -195,11 +239,23 @@ export default {
     editItem (item) {
       // 保存此id，说明这个哪个用户
       this.editedItem.id =item.id;
-      // 修改editedIndex来说明现在是修改
-      this.editedIndex = this.dataList.indexOf(item);
-      // 将此行的数据复制到editedItem，用于Dialog展示，【es6新语法】
-      this.editedItem = Object.assign({},item);
-      this.dialog =true;
+      // 查询学院信息
+      this.$axios.post("/faculty/findFacultyNameForTeach").then((res)=>{
+        if (res.data.code===200){
+          //保存学员信息
+          this.faculty = res.data.data;
+          // 修改editedIndex来说明现在是修改
+          this.editedIndex = this.dataList.indexOf(item);
+          // 将此行的数据复制到editedItem，用于Dialog展示，【es6新语法】
+          this.editedItem = Object.assign({},item);
+          this.dialog =true;
+        }
+        else{
+          this.$message.error(res.data.data);
+        }
+      }).catch(()=>{
+        this.$message.error("查询院系信息失败请检查网络")
+      })
     },
 
     // 点击删除按钮
@@ -249,6 +305,7 @@ export default {
 
     // 新建，或者修改 页面的保存
     save () {
+      this.saveLoading =true;
       // 如果是新建的保存
       if (this.editedIndex===-1){
         // 验证表单输入,如果通过，像后端发请求
@@ -260,22 +317,26 @@ export default {
                 if (res.data.code===200){
                   this.findPage();
                   this.$message.success(res.data.data);
+                  this.saveLoading =false;
                   this.close();
                 }
                 // 如果后端提示失败
                 else{
                   this.$message.error(res.data.data);
+                  this.saveLoading =false;
                 }
               })
               // 如果请求发送失败
               .catch(()=>{
                 this.$message.error("请求发送失败，请检查网络");
+                this.saveLoading =false;
                 this.close();
               });
         }
         // 如果表单输入有问题，则关闭弹窗
         else{
           this.$message.error("请检查输入的格式是否有问题");
+          this.saveLoading =false;
         }
       }
       // 如果是修改保存
@@ -298,11 +359,13 @@ export default {
               // 无论成功还是失败都要调用查询方法，重新查询
               .finally(()=>{
                 this.findPage();
+                this.saveLoading =false;
                 this.close();
               });
         }
         else {
           this.$message.error("请检查输入的格式是否有问题");
+          this.saveLoading =false;
         }
       }
     },
