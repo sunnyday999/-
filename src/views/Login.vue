@@ -27,7 +27,6 @@
                 label="密码"
                 type="password"
                 v-model="password"
-                :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="show ? 'text' : 'password'"
                 @click:append="show = !show"
                 :rules="passwordRules"
@@ -66,11 +65,7 @@ export default {
       // 表单校验
       type: 'success',
       usernameRules: [
-        value => !!value || '不能为空',
-        value => {
-          let pattern = /^[0-9]*$/
-          return pattern.test(value)|| '只能是数字'},
-      ],
+        value => !!value || '不能为空'],
       passwordRules: [
         value => !!value || '不能为空',
       ],
@@ -115,14 +110,15 @@ export default {
       this.$axios.post("/login/login",{
         username: this.username,
         password: this.password
-      })
-          .then((response)=>{
+      }).then((response)=>{
             // 如果密码账号没问题
             if (response.data.code===200){
               this.$message.success("登录成功")
               //保存token
               this.$store.commit("setTokenName",response.data.data.tokenName);
               this.$store.commit("setTokenValue",response.data.data.tokenValue);
+              //保存用户名
+              this.$store.commit("setUsername",this.username);
               //跳转页面
               this.$router.push("/home")
             }

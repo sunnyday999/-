@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-toolbar elevation="0" dense>
+  <div  style="background-color: #EEEEEE">
+    <v-toolbar elevation="0" dense style="background-color: #EEEEEE">
       <v-spacer/>
       <div class=" mb-3 subtitle-1">
         {{extend}},今天是<strong>{{time}}</strong>

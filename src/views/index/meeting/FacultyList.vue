@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app  style="background-color: #EEEEEE">
     <v-container>
       <!--表格-->
       <v-data-table

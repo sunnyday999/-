@@ -1,7 +1,7 @@
 <template>
-  <v-app>
+  <v-app style="background-color: #EEEEEE">
     <!--顶部导航-->
-    <v-app-bar app flat hide-on-scroll  absolute   >
+    <v-app-bar app flat hide-on-scroll  absolute>
       <v-app-bar-nav-icon @click="permanent=!permanent;mini=!mini"/>
       <v-list-item-title class="body-1 ml-3">{{ title }}</v-list-item-title>
       <v-spacer/>
@@ -116,9 +116,9 @@
       <v-list  nav>
         <div v-for="item in  menuList" :key="item.id">
           <!--如果没有子路由-->
-          <div v-if="item.items.length===0">
+          <div v-if="item.children.length===0">
             <v-list-item
-                @click="title = item.title"
+                @click="title = item.name"
                 :to="item.path"
                 active-class="success white--text"
                 color="success"
@@ -130,14 +130,14 @@
                   class="mr-3">{{ item.icon }}</v-icon>
               <v-list-item-content
                   class="white--text">
-                {{item.title}}
+                {{item.name}}
               </v-list-item-content>
             </v-list-item>
           </div>
           <!--如果有子路由-->
           <div v-else>
             <v-list-group
-                @click="title = item.title"
+                @click="title = item.name"
                 append-icon="mdi-menu-up"
                 color="success"
             >
@@ -151,13 +151,13 @@
                 </v-icon>
                 <!--title-->
                 <v-list-item-content>
-                  <v-list-item-title v-text="item.title"></v-list-item-title>
+                  <v-list-item-title v-text="item.name"></v-list-item-title>
                 </v-list-item-content>
               </template>
               <!--二级菜单-->
               <v-list-item
-                  @click="title = item.title +' > '+subItem.title "
-                  v-for="subItem in item.items"
+                  @click="title = item.name +' / '+subItem.name "
+                  v-for="subItem in item.children"
                   :key="subItem.id"
                   :to="item.path + subItem.path"
                   active-class="success white--text"
@@ -171,7 +171,7 @@
                     class="mr-3 ml-5">{{ subItem.icon }}</v-icon>
                 <v-list-item-content
                     class="white--text">
-                  {{subItem.title}}
+                  {{subItem.name}}
                 </v-list-item-content>
               </v-list-item>
             </v-list-group>
@@ -200,29 +200,32 @@ export default {
       mini: false,     // 默认不是mini
       permanent:true,  // 默认是侧栏展开
       title: "首页", // 默认首页
-      //后台拿到的列表
-      menuList: [
-        { id:'1',title: '首页', icon: 'fa fa-home',path:'/home',items: []},
-        { id:'2',title: '会议管理', icon: 'fa fa-briefcase',path:'/meeting',
-          items:[
-            {title: '会议列表', icon: 'fa fa-briefcase',path:'/meetingList' },
-            {title: '会议室列表', icon: 'fa fa-home',path:'/meetingRoomList' },
-            {title: '院系列表', icon: 'fa fa-university',path:'/facultyList' },
-          ]},
-        { id:'3',title: '用户管理', icon: 'fa fa-users',path:'/user',
-          items:[
-            {title: '角色列表', icon: 'fa fa-address-book-o',path:'/roleList'},
-            {title: '用户列表', icon: 'fa fa-users',path:'/userList'},
-            {title: '管理员列表', icon: 'fa fa-user-circle-o',path:'/adminList'},
-          ]},
-        { id:'4', title: '消息管理', icon: 'fa fa-comments',path:'#',items:[]},
-        { id:'5',title: '我的', icon: 'fa fa-user-circle-o',path: '/my',
-          items:[
-            {title: '我的会议', icon: 'fa fa-pencil-square',path: '/myMeeting' },
-            {title: '我的消息', icon: 'fa fa-commenting',path: '/myMessage' },
-            {title: '我的信息', icon: 'fa fa-address-card-o',path: '/myInfo'},
-          ]},
-      ],
+
+      // menuList: [
+      //   { id:'1',title: '首页', icon: 'fa fa-home',path:'/home',items: []},
+      //   { id:'2',title: '会议管理', icon: 'fa fa-briefcase',path:'/meeting',
+      //     items:[
+      //       {title: '会议列表', icon: 'fa fa-briefcase',path:'/meetingList' },
+      //       {title: '会议室列表', icon: 'fa fa-home',path:'/meetingRoomList' },
+      //       {title: '院系列表', icon: 'fa fa-university',path:'/facultyList' },
+      //     ]},
+      //   { id:'3',title: '用户管理', icon: 'fa fa-users',path:'/user',
+      //     items:[
+      //       {title: '角色列表', icon: 'fa fa-address-book-o',path:'/roleList'},
+      //       {title: '用户列表', icon: 'fa fa-users',path:'/userList'},
+      //       {title: '管理员列表', icon: 'fa fa-user-circle-o',path:'/adminList'},
+      //     ]},
+      //   { id:'4', title: '消息管理', icon: 'fa fa-comments',path:'/message',items:[]},
+      //   { id:'5',title: '我的', icon: 'fa fa-user-circle-o',path: '/my',
+      //     items:[
+      //       {title: '我的会议', icon: 'fa fa-briefcase',path: '/myMeeting' },
+      //       {title: '申请会议', icon: 'fa fa-pencil-square',path: '/myApply' },
+      //       {title: '我的消息', icon: 'fa fa-commenting',path: '/myMessage' },
+      //       {title: '我的信息', icon: 'fa fa-address-card-o',path: '/myInfo'},
+      //     ]},
+      // ],
+      menuList: [],
+
       // 用户消息相关
       readMessageNum: 1,
       unreadMessageNum: 10,
@@ -236,24 +239,64 @@ export default {
     };
   },
   created() {
+    //在页面加载时读取sessionStorage里的状态信息
+    if (sessionStorage.getItem("store") ) {
+      this.$store.replaceState(Object.assign({}, this.$store.state,JSON.parse(sessionStorage.getItem("store"))))
+    }
+    //在页面刷新时将vuex里的信息保存到sessionStorage里
+    window.addEventListener("beforeunload",()=>{
+      sessionStorage.setItem("store",JSON.stringify(this.$store.state))
+    })
     this.initMenu();
   },
   methods:{
-    //获取菜单信息
     initMenu(){
-      this.$axios.post("/menu/findAllMenu").then((res)=>{
-        if (res.data.code===200){
-          this.$store.commit("setMenuList",res.data.data);
+      // 获取此用户对应的菜单信息
+      this.$axios.post("/menu/findByUsername/"+this.$store.state.username,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'token': this.$store.state.token.tokenValue,
         }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.menuList = res.data.data;
+        }else {
+          this.$message.error(res.data.message);
+        }
+      }).catch(()=>{
+        this.$message.error("获取用户菜单失败");
       });
     },
     //我的信息
     myInfo(){
-
+      //路由到登录页面
+      this.$router.push("/my/myInfo")
     },
     //登出
     signOut(){
+      this.$axios.post("/login/logout",null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          //删除过期token
+          this.$store.commit("setTokenName",'');
+          this.$store.commit("setTokenValue",'');
+          this.$message.success(res.data.message);
+          //路由到登录页面
+          this.$router.push("/login")
+        }
+        else {
+          this.$message.error(res.data.message);
+        }
 
+      }).catch(()=>{
+        this.$message.error("请检查网络问题");
+      });
     },
   },
 }

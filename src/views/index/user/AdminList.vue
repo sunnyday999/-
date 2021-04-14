@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app  style="background-color: #EEEEEE">
     <v-container>
       <!--表格-->
       <v-data-table
@@ -162,7 +162,7 @@
                     label="输入代表重置密码"></v-text-field>
               </div>
               <v-select
-                  prepend-icon="fa fa-university"
+                  prepend-icon="mdi mdi-bank"
                   v-model="editedItem.faculty"
                   menu-props="auto"
                   color="success"
@@ -171,7 +171,7 @@
                   :rules="[rules.required]"
               ></v-select>
               <v-select
-                  prepend-icon="fa fa-address-book-o"
+                  prepend-icon="mdi mdi-account-box"
                   v-model="editedItem.role"
                   menu-props="auto"
                   color="success"

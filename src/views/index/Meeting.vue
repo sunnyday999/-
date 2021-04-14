@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container  style="background-color: #EEEEEE">
     <!--按钮组-->
     <v-card elevation="0" class="mb-3">
       <v-card-actions>

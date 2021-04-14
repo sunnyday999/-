@@ -15,15 +15,26 @@ import UserList from "@/views/index/user/UserList";
 import AdminList from "@/views/index/user/AdminList";
 
 //my
-import MyMeeting from "@/views/index/my/MyMeeting";
 import MyMessage from "@/views/index/my/MyMessage";
+
 import MyInfo from "@/views/index/my/MyInfo";
+//我的申请
+import MyApply from "@/views/index/my/MyApply";
+import Apply from "@/views/index/my/MyApply/Apply";
+import HistoryApply from "@/views/index/my/MyApply/HistoryApply";
+//我的会议
+import MyMeeting from "@/views/index/my/MyMeeting";
+import History from "@/views/index/my/myMeeting/History";
+import Future from "@/views/index/my/myMeeting/Future";
 
 
 
 import vuex from "@/vuex/vuex";
 import axios from "axios";
 import * as path from "path";
+
+//router
+import Message from "@/views/index/Message";
 
 Vue.use(VueRouter)
 
@@ -32,8 +43,11 @@ const routes = [
         path: '/',
         name: 'index',
         component: Index,
+        redirect: '/home',
         children:[
+            //主页
             {path: '/home', name: 'home', component: Home},
+            //会议相关
             {path: '/meeting/meetingList', name: 'meetingList', component: MeetingList},
             {
                 path: '/meeting/meetingRoomList',
@@ -41,15 +55,36 @@ const routes = [
                 component: MeetingRoomList,
             },
             {path: '/meeting/facultyList', name: 'facultyList', component: FacultyList},
-
+            //用户相关
             {path: '/user/roleList', name: 'roleList', component: RoleList},
             {path: '/user/userList', name: 'userList', component: UserList},
             {path: '/user/adminList', name: 'adminList', component: AdminList},
-
+            //个人相关
             {path: '/my/myInfo', name: 'myInfo', component: MyInfo},
             {path: '/my/myMessage', name: 'myMessage', component: MyMessage},
-            {path: '/my/myMeeting', name: 'myMeeting', component: MyMeeting},
+            {
+                path: '/my/myMeeting',
+                name: 'myMeeting',
+                component: MyMeeting,
+                redirect: '/my/myMeeting/history',
+                children: [
+                    {path: '/my/myMeeting/history', name: 'history', component: History},
+                    {path: '/my/myMeeting/future', name: 'future', component: Future},
+                ]
 
+            },
+            {
+                path: '/my/myApply',
+                name: 'myApply',
+                component: MyApply,
+                redirect: '/my/myApply/history',
+                children: [
+                    {path: '/my/myApply/history', name: 'history', component: HistoryApply},
+                    {path: '/my/myApply/apply', name: 'apply', component: Apply},
+                ]
+            },
+            //消息
+            {path: '/message', name: 'message', component: Message},
         ]
     },
     {

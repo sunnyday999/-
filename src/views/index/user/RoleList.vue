@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app  style="background-color: #EEEEEE">
     <v-container>
       <!--表格-->
       <v-data-table
@@ -47,12 +47,8 @@
         </template>
         <!--操作的按钮-->
         <template v-slot:item.actions="{ item }">
-          <div v-if="item.code==='SuperAdmin'">
-          </div>
-          <div v-else>
-            <v-btn small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
-            <v-btn small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
-          </div>
+          <v-btn small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
+          <v-btn small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
         </template>
       </v-data-table>
 
@@ -81,9 +77,9 @@
           <!--新建页面的内容-->
           <v-card-text>
             <v-container>
-              <v-text-field color="success" v-model="editedItem.name" label="角色名称" :rules="[rules.required]"></v-text-field>
-              <v-text-field color="success" v-model="editedItem.code" label="角色代号" :rules="[rules.required]"></v-text-field>
-              <v-text-field color="success" v-model="editedItem.info" label="角色描述" :rules="[rules.required,rules.length(30)]"></v-text-field>
+              <v-text-field prepend-icon="mdi mdi-account-box" color="success" v-model="editedItem.name" label="角色名称" :rules="[rules.required]"></v-text-field>
+              <v-text-field prepend-icon="mdi mdi-alpha-c-box" color="success" v-model="editedItem.code" label="角色代号" :rules="[rules.required]"></v-text-field>
+              <v-text-field prepend-icon="mdi mdi-alpha-i-box" color="success" v-model="editedItem.info" label="角色描述" :rules="[rules.required,rules.length(30)]"></v-text-field>
               <v-radio-group mandatory v-model="editedItem.admin" row>
                 <v-radio color="success" label="管理员" :value=true></v-radio>
                 <v-radio color="success" label="非管理员" :value=false></v-radio>
@@ -224,15 +220,30 @@ export default {
     this.findPage();
   },
   methods:{
-    update(item){
-      console.log(item);
-    },
     //展示新建弹窗
     showCreateDialog(){
+      // 获取全部菜单信息
+      this.$axios.post("/menu/findAllMenu",null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.menuList = res.data.data;
+        }
+      });
       this.dialog =true;
     },
     //点击保存按钮
     save(){
+      //先过滤到被删除的父节点,然后加入
+      let menu =  this.editedItem.menuList.filter((m)=>{
+        return m!==2 && m!==3 && m!==5 && m!==11 && m!==15
+      })
+      menu.push(2,3,5,11,15);
+      this.editedItem.menuList = menu;
       this.saveLoading =true;
       // 验证表单输入,如果通过，像后端发请求
       let validate = this.$refs.form.validate();
@@ -241,11 +252,11 @@ export default {
         if (this.editedIndex===-1) {
           this.$axios.post("/role/add",this.editedItem).then((res)=>{
             if (res.data.code===200){
-              this.$message.success(res.data.data)
+              this.$message.success(res.data.message)
               this.findPage();
               this.close();
             }else {
-              this.$message.error(res.data.data)
+              this.$message.error(res.data.message)
             }
           }).catch(()=>{
             this.$message.error("请求发送失败，请检查网络");
@@ -257,11 +268,11 @@ export default {
         else {
           this.$axios.post("/role/edit",this.editedItem).then((res)=>{
             if (res.data.code===200){
-              this.$message.success(res.data.data)
+              this.$message.success(res.data.message)
               this.findPage();
               this.close();
             }else {
-              this.$message.error(res.data.data)
+              this.$message.error(res.data.message)
             }
           }).catch(()=>{
             this.$message.error("请求发送失败，请检查网络");
@@ -299,10 +310,10 @@ export default {
     deleteItemConfirm () {
       this.$axios.post("/role/delete/"+this.editedItem.id).then((res)=>{
         if (res.data.code===200){
-          this.$message.success(res.data.data);
+          this.$message.success(res.data.message);
         }
         else {
-          this.$message.error(res.data.data);
+          this.$message.error(res.data.message);
         }
       }).catch(()=>{
         this.$message.error("发送请求失败，请检查网络");
@@ -355,7 +366,7 @@ export default {
     formTitle () {
       return this.editedIndex === -1 ? '新建角色' : '编辑角色'
     },
-  },
+},
 
   watch: {
     dialog (val) {

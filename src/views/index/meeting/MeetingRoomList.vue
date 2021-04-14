@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app  style="background-color: #EEEEEE">
     <v-container>
       <!--表格-->
       <v-data-table
@@ -86,7 +86,8 @@
 
         <!--第一列展示图片-->
         <template v-slot:item.img="{item}">
-          <v-img :src="`http://img.yangcc.top/`+item.img" lazy-src="http://img.yangcc.top/image1.jpg" width="150" height="75"
+          <v-img :src="`http://img.yangcc.top/`+item.img"
+                 lazy-src="http://img.yangcc.top/image1.jpg" width="150" height="75"
                  class="img" @click.stop="showImg(item)">
             <!--当图片有问题时候，显示无法加载的样式-->
             <template v-slot:placeholder>
@@ -157,32 +158,33 @@
               <v-file-input accept="image/*"
                             @change="onFileChange"
                             label="上传图片"
-                            :rules="[rules.required]"
                             show-size color="success" truncate-length="20"></v-file-input>
               <!--选择院系-->
               <v-select
-                  append-icon="fa fa-university"
-                  v-model="editedItem.faculty"
+                  prepend-icon="mdi mdi-bank"
+                  v-model="editedItem.faculty.name"
                   menu-props="auto"
                   color="success"
                   :rules="[rules.required]"
                   :items="faculty.map(map=>map.name)"
                   label="所属院系"
-                  @change="change(editedItem.faculty)"
+                  @change="change(faculty)"
               ></v-select>
-              <div v-if="editedItem.faculty.name==='行政大楼1' || editedItem.faculty==='行政大楼2' ||editedItem.faculty==='学术报告厅' ||editedItem.faculty==='会议厅2' ||editedItem.faculty==='会议厅1' ">
-                <v-text-field disabled :prefix="prefixLocation" color="success" v-model="editedItem.location" label="会议室地点"></v-text-field>
-              </div>
-              <div v-else>
-                <div v-if="prefixLocation ===''">
-                  <v-text-field :prefix="prefixLocation" color="success" v-model="editedItem.location" label="会议室地点" :rules="[rules.required]"></v-text-field>
-                </div>
-                <div v-else>
-                  <v-text-field :prefix="prefixLocation+'-'" color="success" v-model="editedItem.location" label="会议室地点" :rules="[rules.required]"></v-text-field>
-                </div>
-              </div>
 
-              <v-text-field color="success" v-model="editedItem.capacity" label="可容纳人数" :rules="[rules.required,rules.capacityRules]"></v-text-field>
+              <v-text-field
+                  :disabled="disabled"
+                  :prefix="prefixLocation"
+                  prepend-icon="mdi mdi-factory"
+                  color="success"
+                  v-model="editedItem.room"
+                  label="会议室地点">
+              </v-text-field>
+              <v-text-field
+                  prepend-icon="mdi mdi-account-group"
+                  color="success"
+                  v-model="editedItem.capacity"
+                  label="可容纳人数"
+                  :rules="[rules.required,rules.capacityRules]"></v-text-field>
 
               <v-radio-group mandatory v-model="editedItem.status" row>
                 <v-radio color="success" label="可用" value="可用"></v-radio>
@@ -252,6 +254,9 @@ export default {
       info: '',
       location: '',
 
+      // 新增修改页面的会议地点是否可以输入
+      disabled: false,
+
       rules: {
         capacityRules: value => {let pattern = /^[0-9]*$/
           return pattern.test(value)|| '只能是数字'},
@@ -260,6 +265,7 @@ export default {
       },
       //存放学院信息
       faculty: [],
+      //会议室的地点
       prefixLocation: '',
       // 图片文件
       img: '',
@@ -350,21 +356,27 @@ export default {
       editedItem: {
         id: '',
         img: '',
-        location:'',
+        room:'',
         capacity: '',
         status: '',
         info:'',
-        faculty: '',
+        faculty: {
+          name: '',
+          location: '',
+        }
       },
       // 点击清空时候赋值
       defaultItem: {
         id: '',
         img: '',
-        location:'',
+        room:'',
         capacity:'',
         status: '',
         info: '',
-        faculty: '',
+        faculty: {
+          name: '',
+          location: '',
+        }
       },
     };
   },
@@ -375,16 +387,21 @@ export default {
 
   // 所有的方法
   methods: {
-    //当选择框改变的时候修改输入框的前缀值
+    //选择院系后,对应的院系地点前缀填上
     change(faculty){
-      let data = this.faculty.filter((list)=>{
-        return list.name===faculty;
+      //获取对应的对象
+      let data = faculty.filter((list)=>{
+        return list.name===this.editedItem.faculty.name;
       })
-      this.prefixLocation = data.map((map)=>map.location)[0];
-      // 如果是几个一层会议室
-      if ( this.prefixLocation==='A01'|| this.prefixLocation==='A02'|| this.prefixLocation==='B01'|| this.prefixLocation==='B02'|| this.prefixLocation==='C01'){
-        this.editedItem.location='';
+      //如果是教学楼,则加上-
+      if (data[0].teach===true){
+        this.prefixLocation = data[0].location+'-';
       }
+      else{
+        this.prefixLocation = data[0].location;
+        this.disabled = true;
+      }
+
     },
     //图片上传
     onFileChange(file){
@@ -394,13 +411,13 @@ export default {
     showCreateDialog(){
       this.prefixLocation='';
       // 查询学院信息
-      this.$axios.post("/faculty/findAllName").then((res)=> {
+      this.$axios.post("/faculty/findAll").then((res)=> {
         if (res.data.code === 200) {
           this.faculty=res.data.data;
           this.dialog =true;
         }
         else {
-          this.$message.error(res.data.data);
+          this.$message.error(res.data.message);
         }
       }).catch(()=>{
         this.$message.error("查询院系信息失败请检查网络")
@@ -414,7 +431,10 @@ export default {
     //展示会议室描述
     showInfo(item){
       this.info=item.info;
-      this.location=item.location;
+      if (item.room ===null){
+        item.room="";
+      }
+      this.location=item.faculty.location+" "+item.room;
       this.infoDialog=true;
     },
     // 点击搜索按钮
@@ -427,28 +447,33 @@ export default {
       // 保存此id，说明这个哪个用户
       this.editedItem.id =item.id;
       // 查询学院信息
-      this.$axios.post("/faculty/findAllName").then((res)=>{
+      this.$axios.post("/faculty/findAll").then((res)=>{
         if (res.data.code===200){
-          //保存学员信息
+          //保存信息
           this.faculty = res.data.data;
-          // 修改前缀值
-          let data = this.faculty.filter((list)=>{
-            return list.name===item.faculty;
-          })
-          this.prefixLocation = data.map((map)=>map.location)[0];
           // 修改editedIndex来说明现在是修改
           this.editedIndex = this.dataList.indexOf(item);
           // 将此行的数据复制到editedItem，用于Dialog展示，【es6新语法】
           this.editedItem = Object.assign({},item);
-          this.editedItem.location=this.editedItem.location.substring(4);
+          //获取对应的对象
+          let data = this.faculty.filter((list)=>{
+            return list.name===this.editedItem.faculty.name;
+          })
+          //如果是教学楼,则加上-
+          if (data[0].teach===true){
+            this.prefixLocation = data[0].location+'-';
+          }
+          else{
+            this.prefixLocation = data[0].location;
+            this.disabled = true;
+          }
           this.dialog =true;
-        }
-        else{
-          this.$message.error(res.data.data);
+        }else{
+          this.$message.error(res.data.message);
         }
       }).catch(()=>{
-        this.$message.error("查询院系信息失败请检查网络")
-      })
+        this.$message.error("查询学院信息失败,请检查网络");
+      });
     },
 
     // 点击删除按钮
@@ -462,12 +487,12 @@ export default {
 
     // 删除页面的删除按钮
     deleteItemConfirm () {
-      this.$axios.post("/meetingRoom/delete",{id:this.editedItem.id}).then((res)=>{
+      this.$axios.post("/meetingRoom/delete/"+this.editedItem.id).then((res)=>{
         if (res.data.code===200){
-          this.$message.success(res.data.data);
+          this.$message.success(res.data.message);
         }
         else {
-          this.$message.error(res.data.data);
+          this.$message.error(res.data.message);
         }
       }).catch(()=>{
         this.$message.error("发送请求失败，请检查网络");
@@ -494,11 +519,58 @@ export default {
       if (validate === true) {
         // 如果是新建的页面
         if (this.editedIndex===-1) {
-          // 检查是否传图片，以及格式
-          if(this.img===undefined || this.img===null||this.img.type.substring(0,5)!=='image'){
-            this.$message.error("请检查文件是否上传,或者文件是否为图片")
+          this.saveLoading =true;
+          let formData = new FormData;
+          formData.append('file',this.img)
+          formData.append('status',this.editedItem.status)
+          formData.append('capacity',this.editedItem.capacity)
+          formData.append('room',this.editedItem.room)
+          formData.append('info',this.editedItem.info)
+          formData.append('name',this.editedItem.faculty.name)
+          formData.append('location',this.editedItem.faculty.location)
+          this.$axios.post("/meetingRoom/upload",formData).then((res)=>{
+            //如果后端提示成功
+            if (res.data.code===200){
+              this.findPage();
+              this.$message.success(res.data.message);
+              this.saveLoading =false;
+              this.close();
+            }
+            // 如果后端提示失败
+            else{
+              this.$message.error(res.data.message);
+              this.saveLoading =false;
+            }
+          }).catch(()=>{
+            this.$message.error("请求发送失败，请检查网络");
+            this.saveLoading =false;
+            this.close();
+          })
+        }
+        // 如果是修改
+        else{
+          // 如果是默认的值空，表示没有修改图片
+          if (this.img==='' || this.img===null){
+            this.saveLoading =true;
+            //不带图片的http请求，表示只修改其他信息
+            this.$axios.post("/meetingRoom/edit",this.editedItem).then((res)=>{
+              if (res.data.code===200){
+                this.findPage();
+                this.$message.success(res.data.message);
+                this.saveLoading =false;
+                this.close();
+              }
+              else{
+                this.$message.error(res.data.message);
+                this.saveLoading =false;
+              }
+            }).catch(()=>{
+              this.$message.error("请求发送失败，请检查网络");
+              this.saveLoading =false;
+              this.close();
+            });
           }
-          // 如果没问题将图片上传,以及保存新建的信息
+          // 否则就代表修改了图片
           else{
             //对会议室地点拼接上前缀
             if (this.editedItem.location===''){
@@ -510,53 +582,24 @@ export default {
             this.saveLoading =true;
             let formData = new FormData;
             formData.append('file',this.img)
+            formData.append('id',this.editedItem.id)
             formData.append('status',this.editedItem.status)
             formData.append('capacity',this.editedItem.capacity)
-            formData.append('location',this.editedItem.location)
+            formData.append('room',this.editedItem.room)
             formData.append('info',this.editedItem.info)
-            formData.append('faculty',this.editedItem.faculty)
-            this.$axios.post("/meetingRoom/upload",formData).then((res)=>{
+            formData.append('name',this.editedItem.faculty.name)
+            formData.append('location',this.editedItem.faculty.location)
+            this.$axios.post("/meetingRoom/editAndUpload",formData).then((res)=>{
               //如果后端提示成功
               if (res.data.code===200){
                 this.findPage();
-                this.$message.success(res.data.data);
+                this.$message.success(res.data.message);
                 this.saveLoading =false;
                 this.close();
               }
               // 如果后端提示失败
               else{
-                this.$message.error(res.data.data);
-                this.saveLoading =false;
-              }
-            }).catch(()=>{
-              this.$message.error("请求发送失败，请检查网络");
-              this.saveLoading =false;
-              this.close();
-            })
-          }
-        }
-        // 如果是修改
-        else{
-          // 如果是默认的值空，表示没有修改图片
-          if (this.img==='' || this.img===null){
-            //对会议室地点拼接上前缀
-            if (this.editedItem.location===''){
-              this.editedItem.location=this.prefixLocation
-            }
-            else{
-              this.editedItem.location=this.prefixLocation+'-'+this.editedItem.location
-            }
-            this.saveLoading =true;
-            //不带图片的http请求，表示只修改其他信息
-            this.$axios.post("/meetingRoom/edit",this.editedItem).then((res)=>{
-              if (res.data.code===200){
-                this.findPage();
-                this.$message.success(res.data.data);
-                this.saveLoading =false;
-                this.close();
-              }
-              else{
-                this.$message.error(res.data.data);
+                this.$message.error(res.data.message);
                 this.saveLoading =false;
               }
             }).catch(()=>{
@@ -564,49 +607,6 @@ export default {
               this.saveLoading =false;
               this.close();
             });
-          }
-          // 否则就代表修改了图片
-          else{
-            // 修改了图片要检测文件类型
-            if(this.img === undefined||this.img.type.substring(0,5)!=='image'){
-              this.$message.error("请检查文件是否上传,或者文件是否为图片")
-            }
-            // 如果符合规范，走上传图片的这一请求
-            else{
-              //对会议室地点拼接上前缀
-              if (this.editedItem.location===''){
-                this.editedItem.location=this.prefixLocation
-              }
-              else{
-                this.editedItem.location=this.prefixLocation+'-'+this.editedItem.location
-              }
-              this.saveLoading =true;
-              let formData = new FormData;
-              formData.append('file',this.img)
-              formData.append('status',this.editedItem.status)
-              formData.append('capacity',this.editedItem.capacity)
-              formData.append('location',this.editedItem.location)
-              formData.append('info',this.editedItem.info)
-              formData.append('faculty',this.editedItem.faculty)
-              this.$axios.post("/meetingRoom/editAndUpload",formData).then((res)=>{
-                //如果后端提示成功
-                if (res.data.code===200){
-                  this.findPage();
-                  this.$message.success(res.data.data);
-                  this.saveLoading =false;
-                  this.close();
-                }
-                // 如果后端提示失败
-                else{
-                  this.$message.error(res.data.data);
-                  this.saveLoading =false;
-                }
-              }).catch(()=>{
-                this.$message.error("请求发送失败，请检查网络");
-                this.saveLoading =false;
-                this.close();
-              });
-            }
           }
         }
       }
@@ -642,12 +642,14 @@ export default {
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem) // 清空保存数据的editedItem
         this.editedIndex = -1   // 重置弹出框标题
+        this.disabled = false;
+        this.prefixLocation = '';
         this.$refs.form.reset() // 重置表单
       })
     },
     clean(){
       this.pagination.meetingRoom.id='';
-      this.pagination.meetingRoom.location='';
+      this.pagination.meetingRoom.faculty.location='';
       this.pagination.meetingRoom.status='';
       this.pagination.meetingRoom.capacity='';
       this.pagination.meetingRoom.faculty.name='';
@@ -676,7 +678,7 @@ export default {
 .mycard{
   width: 100px;
   height: 100px;
-  top: -30px;
+  top: -15px;
 }
 .img:hover{
   cursor: pointer;
