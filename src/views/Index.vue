@@ -72,7 +72,10 @@
               v-bind="attrs"
               v-on="on"
               size="30">
-            <v-img src="http://img.yangcc.top/header.jpg" alt="Avatar"/>
+            <v-img
+                :src="'http://img.yangcc.top/'+avatar"
+                lazy-src="http://img.yangcc.top/header.jpg"
+                alt="Avatar"/>
           </v-avatar>
         </template>
         <v-list dense>
@@ -200,32 +203,8 @@ export default {
       mini: false,     // 默认不是mini
       permanent:true,  // 默认是侧栏展开
       title: "首页", // 默认首页
-
-      // menuList: [
-      //   { id:'1',title: '首页', icon: 'fa fa-home',path:'/home',items: []},
-      //   { id:'2',title: '会议管理', icon: 'fa fa-briefcase',path:'/meeting',
-      //     items:[
-      //       {title: '会议列表', icon: 'fa fa-briefcase',path:'/meetingList' },
-      //       {title: '会议室列表', icon: 'fa fa-home',path:'/meetingRoomList' },
-      //       {title: '院系列表', icon: 'fa fa-university',path:'/facultyList' },
-      //     ]},
-      //   { id:'3',title: '用户管理', icon: 'fa fa-users',path:'/user',
-      //     items:[
-      //       {title: '角色列表', icon: 'fa fa-address-book-o',path:'/roleList'},
-      //       {title: '用户列表', icon: 'fa fa-users',path:'/userList'},
-      //       {title: '管理员列表', icon: 'fa fa-user-circle-o',path:'/adminList'},
-      //     ]},
-      //   { id:'4', title: '消息管理', icon: 'fa fa-comments',path:'/message',items:[]},
-      //   { id:'5',title: '我的', icon: 'fa fa-user-circle-o',path: '/my',
-      //     items:[
-      //       {title: '我的会议', icon: 'fa fa-briefcase',path: '/myMeeting' },
-      //       {title: '申请会议', icon: 'fa fa-pencil-square',path: '/myApply' },
-      //       {title: '我的消息', icon: 'fa fa-commenting',path: '/myMessage' },
-      //       {title: '我的信息', icon: 'fa fa-address-card-o',path: '/myInfo'},
-      //     ]},
-      // ],
+      avatar: '',
       menuList: [],
-
       // 用户消息相关
       readMessageNum: 1,
       unreadMessageNum: 10,
@@ -267,6 +246,23 @@ export default {
       }).catch(()=>{
         this.$message.error("获取用户菜单失败");
       });
+      //获取用户头像信息
+      this.$axios.post("/user/findAvatarByUsername/"+this.$store.state.username,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.$store.commit("setAvatar",res.data.data);
+          this.avatar = this.$store.state.avatar;
+        }else {
+          this.$message.error(res.data.message);
+        }
+      }).catch(()=>{
+        this.$message.error("获取用户头像失败");
+      });
     },
     //我的信息
     myInfo(){
@@ -286,6 +282,9 @@ export default {
           //删除过期token
           this.$store.commit("setTokenName",'');
           this.$store.commit("setTokenValue",'');
+          this.$store.commit("setUsername", '');
+          //清空sessionStorage
+          sessionStorage.clear();
           this.$message.success(res.data.message);
           //路由到登录页面
           this.$router.push("/login")

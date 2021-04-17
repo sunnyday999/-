@@ -172,7 +172,6 @@
               ></v-select>
 
               <v-text-field
-                  :disabled="disabled"
                   :prefix="prefixLocation"
                   prepend-icon="mdi mdi-factory"
                   color="success"
@@ -253,9 +252,6 @@ export default {
       infoDialog: false,
       info: '',
       location: '',
-
-      // 新增修改页面的会议地点是否可以输入
-      disabled: false,
 
       rules: {
         capacityRules: value => {let pattern = /^[0-9]*$/
@@ -394,14 +390,7 @@ export default {
         return list.name===this.editedItem.faculty.name;
       })
       //如果是教学楼,则加上-
-      if (data[0].teach===true){
-        this.prefixLocation = data[0].location+'-';
-      }
-      else{
-        this.prefixLocation = data[0].location;
-        this.disabled = true;
-      }
-
+      this.prefixLocation = data[0].location+'-';
     },
     //图片上传
     onFileChange(file){
@@ -460,13 +449,7 @@ export default {
             return list.name===this.editedItem.faculty.name;
           })
           //如果是教学楼,则加上-
-          if (data[0].teach===true){
-            this.prefixLocation = data[0].location+'-';
-          }
-          else{
-            this.prefixLocation = data[0].location;
-            this.disabled = true;
-          }
+          this.prefixLocation = data[0].location+'-';
           this.dialog =true;
         }else{
           this.$message.error(res.data.message);
@@ -642,7 +625,6 @@ export default {
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem) // 清空保存数据的editedItem
         this.editedIndex = -1   // 重置弹出框标题
-        this.disabled = false;
         this.prefixLocation = '';
         this.$refs.form.reset() // 重置表单
       })

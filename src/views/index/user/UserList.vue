@@ -364,7 +364,6 @@ export default {
     },
     // 点击修改按钮
     editItem (item) {
-      console.log(item);
       // 保存此id，说明这个哪个用户
       this.editedItem.id =item.id;
       // 查询学院信息
@@ -459,8 +458,6 @@ export default {
               this.editedItem.role = value.code;
             }
           }))
-          console.log(this.editedItem);
-          console.log(this.img);
           //因为是带图片的方式所以只能使用FormData方式
           let formData = new FormData;
           formData.append('avatar',this.img)
@@ -499,6 +496,12 @@ export default {
       }
       // 如果是修改保存
       else {
+        //拿到此角色对应的code
+        this.roles.forEach((value => {
+          if (value.name === this.editedItem.role) {
+            this.editedItem.role = value.code;
+          }
+        }))
         // 验证表单输入,如果通过，才向后端发请求
         let validate = this.$refs.form.validate();
         if (validate === true) {
@@ -525,45 +528,38 @@ export default {
           }
           // 否则就代表修改了图片
           else {
-            // 修改了图片要检测文件类型
-            if(this.img === undefined||this.img.type.substring(0,5)!=='image'){
-              this.$message.error("请检查文件是否上传,或者文件是否为图片")
-            }
-            // 如果符合规范，走上传图片的这一请求
-            else{
-              //拿到此角色对应的code
-              this.roles.forEach((value => {
-                if (value.name === this.editedItem.role) {
-                  this.editedItem.role = value.code;
-                }
-              }))
-              this.saveLoading =true;
-              let formData = new FormData;
-              formData.append("id",this.editedItem.id)
-              formData.append('avatar',this.img)
-              formData.append('username',this.editedItem.username)
-              formData.append('password',this.editedItem.password)
-              formData.append('role',this.editedItem.role)
-              formData.append('faculty',this.editedItem.faculty)
-              this.$axios.post("/user/editAndUpload",formData).then((res)=>{
-                //如果后端提示成功
-                if (res.data.code===200){
-                  this.findPage();
-                  this.$message.success(res.data.message);
-                  this.saveLoading =false;
-                  this.close();
-                }
-                // 如果后端提示失败
-                else{
-                  this.$message.error(res.data.message);
-                  this.saveLoading =false;
-                }
-              }).catch(()=>{
-                this.$message.error("请求发送失败，请检查网络");
+            //拿到此角色对应的code
+            this.roles.forEach((value => {
+              if (value.name === this.editedItem.role) {
+                this.editedItem.role = value.code;
+              }
+            }))
+            this.saveLoading =true;
+            let formData = new FormData;
+            formData.append("id",this.editedItem.id)
+            formData.append('avatar',this.img)
+            formData.append('username',this.editedItem.username)
+            formData.append('password',this.editedItem.password)
+            formData.append('role',this.editedItem.role)
+            formData.append('faculty',this.editedItem.faculty)
+            this.$axios.post("/user/editAndUpload",formData).then((res)=>{
+              //如果后端提示成功
+              if (res.data.code===200){
+                this.findPage();
+                this.$message.success(res.data.message);
                 this.saveLoading =false;
                 this.close();
-              });
-            }
+              }
+              // 如果后端提示失败
+              else{
+                this.$message.error(res.data.message);
+                this.saveLoading =false;
+              }
+            }).catch(()=>{
+              this.$message.error("请求发送失败，请检查网络");
+              this.saveLoading =false;
+              this.close();
+            });
           }
         } else {
           this.$message.error("请检查输入的格式是否有问题");

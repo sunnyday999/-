@@ -89,7 +89,7 @@
                   selectable
                   selected-color="success"
                   v-model="editedItem.menuList"
-                  :items="menuList"
+                  :items="AllMenuList"
               ></v-treeview>
             </v-container>
           </v-card-text>
@@ -178,7 +178,6 @@ export default {
           sortable: false
         },
       ],
-
       rules: {
         length: len => v => (v || '').length <= len || `最大长度为: ${len}`,
         required: v => !!v || '不能为空',
@@ -191,7 +190,7 @@ export default {
         queryString: '', // 查询条件
       },
       dataList: [],  // 要展示的数据数组
-      menuList: [],  // menu列表
+      AllMenuList: [],  // menu列表
       pageCount: 1, // 总页码
 
       // 保存新建，修改弹窗的值
@@ -217,11 +216,11 @@ export default {
     };
   },
   created () {
+    this.init();
     this.findPage();
   },
   methods:{
-    //展示新建弹窗
-    showCreateDialog(){
+    init(){
       // 获取全部菜单信息
       this.$axios.post("/menu/findAllMenu",null,{
         //加入token
@@ -231,19 +230,48 @@ export default {
         }
       }).then((res)=>{
         if (res.data.code===200){
-          this.menuList = res.data.data;
+          this.AllMenuList = res.data.data;
         }
       });
+    },
+    //展示新建弹窗
+    showCreateDialog(){
+      console.log(this.AllMenuList)
       this.dialog =true;
     },
     //点击保存按钮
     save(){
       //先过滤到被删除的父节点,然后加入
       let menu =  this.editedItem.menuList.filter((m)=>{
-        return m!==2 && m!==3 && m!==5 && m!==11 && m!==15
+        return m!==2 && m!==3 && m!==5 && m!==11 && m!==15 && m!==6
       })
-      menu.push(2,3,5,11,15);
-      this.editedItem.menuList = menu;
+      //
+      for (let i = 0; i <menu.length ; i++) {
+        let m = menu[i];
+        if (m===6 || m===7 || m===8){
+          menu.push(2);
+        }
+        if (m===9 || m===10 || m===14){
+          menu.push(3)
+        }
+        if(m===11||m===12||m===13||m===15){
+          menu.push(5)
+        }
+        if (m===16||m===17){
+          menu.push(11)
+        }
+        if(m===18||m===19){
+          menu.push(15)
+        }
+        if(m===20||m===21||m===22||m===23){
+          menu.push(6)
+        }
+      }
+      //去重
+      function unique (arr) {
+        return Array.from(new Set(arr))
+      }
+      this.editedItem.menuList = unique(menu);
       this.saveLoading =true;
       // 验证表单输入,如果通过，像后端发请求
       let validate = this.$refs.form.validate();
@@ -338,7 +366,6 @@ export default {
         // 为，总记录数，数据集合赋值
         this.pagination.total = res.data.data.total;
         this.dataList = res.data.data.rows;
-        this.menuList = this.$store.state.menuList;
         // 总页码赋值
         this.pageCount =Math.ceil(this.pagination.total/this.pagination.pageSize);
       }).catch(()=>{

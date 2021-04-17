@@ -15,11 +15,16 @@ const store =new Vuex.Store({
         },
         //用户名
         username: '',
+        //头像
+        avatar: 'header.jpg',
     },
     // 修改共享数据的方法
     mutations:{
         setUsername(state,username){
             state.username = username;
+        },
+        setAvatar(state,avatar){
+            state.avatar = avatar;
         },
         //给tokenName赋值
         setTokenName(state,tokenName){

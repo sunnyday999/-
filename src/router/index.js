@@ -5,9 +5,14 @@ import Index from "@/views/Index"
 //home
 import Home from "@/views/index/Home";
 // meeting
-import MeetingList from "@/views/index/meeting/MeetingList";
+import Meeting from "@/views/index/meeting/Meeting";
 import MeetingRoomList from "@/views/index/meeting/MeetingRoomList";
 import FacultyList from "@/views/index/meeting/FacultyList";
+//会议相关
+import meetingHistory from "@/views/index/meeting/meeting/History"
+import Ongoing from "@/views/index/meeting/meeting/Ongoing";
+import Verify from "@/views/index/meeting/meeting/Verify";
+import VerifyHistory from "@/views/index/meeting/meeting/VerifyHistory";
 
 // user
 import RoleList from "@/views/index/user/RoleList";
@@ -48,12 +53,19 @@ const routes = [
             //主页
             {path: '/home', name: 'home', component: Home},
             //会议相关
-            {path: '/meeting/meetingList', name: 'meetingList', component: MeetingList},
             {
-                path: '/meeting/meetingRoomList',
-                name: 'meetingRoomList',
-                component: MeetingRoomList,
+                path: '/meeting/meeting',
+                name: 'meeting',
+                component: Meeting,
+                redirect: '/meeting/meeting/meetingHistory',
+                children: [
+                    {path: '/meeting/meeting/meetingHistory', name: 'meetingHistory', component: meetingHistory},
+                    {path: '/meeting/meeting/ongoing', name: 'ongoing', component: Ongoing},
+                    {path: '/meeting/meeting/verify', name: 'verify', component: Verify},
+                    {path: '/meeting/meeting/verifyHistory', name: 'verifyHistory', component: VerifyHistory},
+                ]
             },
+            {path: '/meeting/meetingRoomList', name: 'meetingRoomList', component: MeetingRoomList,},
             {path: '/meeting/facultyList', name: 'facultyList', component: FacultyList},
             //用户相关
             {path: '/user/roleList', name: 'roleList', component: RoleList},
@@ -79,7 +91,7 @@ const routes = [
                 component: MyApply,
                 redirect: '/my/myApply/history',
                 children: [
-                    {path: '/my/myApply/history', name: 'history', component: HistoryApply},
+                    {path: '/my/myApply/history', name: 'myHistory', component: HistoryApply},
                     {path: '/my/myApply/apply', name: 'apply', component: Apply},
                 ]
             },
@@ -99,43 +111,20 @@ const router = new VueRouter({
 })
 
 export default router;
-/*/!*每次切换页面的时候就判断下*!/
-router.beforeEach((to,from,next)=>{
-// 如果是登录页可访问
-    if (to.name ==='error' || to.name==='login'){
-        next();
-    }
-    // 如果是其他页面,先检测是否有token,没有token则跳转到登录页
-    let tokenValue = vuex.state.token.tokenValue;
-    if (tokenValue===undefined || tokenValue===''){
-        next({
-            path: '/login'
-        })
-    }
-    // 如果是从登录界面过来的且有token
-    if (from.name==='login'){
-        console.log("有token放行")
-        next()
-    }
-    //如果是普通的界面，有token需要检测是否正确
-    axios.post("/user/token", null, {
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            tokenValue: vuex.state.token.tokenValue,
-        }
-    }).then(r=>{
-        if (r.data.code===200){
-            next()
-        }
-        else{
-            next({
-                path: '/login'
-            })
-        }
-    }).catch(r=>{
-        next({
-            path: '/login'
-        })
-    });
-})*/
+// /*每次切换页面的时候就判断下*/
+// router.beforeEach((to,from,next)=>{
+// // 如果是登录页可访问
+//     if (to.name ==='error' || to.name==='login'){
+//         next();
+//     }
+//     // 如果是其他页面,先检测是否有token,没有token则跳转到登录页
+//     let tokenValue = vuex.state.token.tokenValue;
+//     if (tokenValue===undefined || tokenValue===''){
+//         next({
+//             path: '/login'
+//         })
+//     }
+//     //如果有token放行
+//     next()
+// })
 

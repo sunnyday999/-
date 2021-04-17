@@ -86,10 +86,8 @@
 
         <!--操作的按钮-->
         <template v-slot:item.actions="{ item }">
-          <div v-if="item.id!==1">
-            <v-btn small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
-            <v-btn small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
-          </div>
+          <v-btn small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
+          <v-btn small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
         </template>
       </v-data-table>
 
@@ -144,7 +142,6 @@
                   color="success"
                   v-model="editedItem.username"
                   label="学号/学工号"
-                  :rules="usernameRules"
                   :click="click"></v-text-field>
               <div v-if="editedIndex===-1">
                 <v-text-field
@@ -208,14 +205,6 @@ export default {
       loading: false,  // 是否展示加载样式
       // 保存按钮的样式
       saveLoading: false,
-
-      // 输入框规则
-      usernameRules: [
-        value => !!value || '不能为空',
-        value => {
-          let pattern = /^[0-9]*$/
-          return pattern.test(value)|| '只能是数字'},
-      ],
       rules: {
         length: len => v => (v || '').length <= len || `最大长度为: ${len}`,
         required: v => !!v || '不能为空',
@@ -362,7 +351,6 @@ export default {
     },
     // 点击修改按钮
     editItem (item) {
-      console.log(item);
       // 保存此id，说明这个哪个用户
       this.editedItem.id =item.id;
       // 查询学院信息
@@ -495,6 +483,12 @@ export default {
       }
       // 如果是修改保存
       else {
+        //拿到此角色对应的code
+        this.roles.forEach((value => {
+          if (value.name === this.editedItem.role) {
+            this.editedItem.role = value.code;
+          }
+        }))
         // 验证表单输入,如果通过，才向后端发请求
         let validate = this.$refs.form.validate();
         if (validate === true) {
