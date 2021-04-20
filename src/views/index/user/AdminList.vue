@@ -65,10 +65,6 @@
               <v-col cols="1" class="ml-5">
                 <v-btn color="deep-purple" class="white--text" elevation="5" @click="clean"><i class="fa fa-times"></i><span>重置</span></v-btn>
               </v-col>
-
-              <v-col cols="1" class="ml-5">
-                <v-btn color="primary" elevation="5"><i class="fa fa-cloud-upload"></i> <span>导入</span></v-btn>
-              </v-col>
             </v-row>
           </v-container>
         </template>
@@ -316,11 +312,23 @@ export default {
     // 显示弹出框
     showDialog(){
       // 查询学院信息
-      this.$axios.post("/faculty/findFacultyNameForTeach").then((res)=> {
+      this.$axios.post("/faculty/findFacultyNameForTeach",null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=> {
         if (res.data.code === 200) {
           this.faculty=res.data.data;
           // 查询角色信息
-          this.$axios.post("/role/findAllAdminRole").then((res)=> {
+          this.$axios.post("/role/findAllAdminRole",null,{
+            //加入token
+            headers: {
+              'Content-Type': 'application/json',
+              'token': this.$store.state.token.tokenValue,
+            }
+          }).then((res)=> {
             if (res.data.code === 200) {
               this.roles=res.data.data;
               this.dialog =true;
@@ -354,12 +362,24 @@ export default {
       // 保存此id，说明这个哪个用户
       this.editedItem.id =item.id;
       // 查询学院信息
-      this.$axios.post("/faculty/findFacultyNameForTeach").then((res)=>{
+      this.$axios.post("/faculty/findFacultyNameForTeach",null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           //保存学员信息
           this.faculty = res.data.data;
           // 查询角色信息
-          this.$axios.post("/role/findAllAdminRole").then((res)=> {
+          this.$axios.post("/role/findAllAdminRole",null,{
+            //加入token
+            headers: {
+              'Content-Type': 'application/json',
+              'token': this.$store.state.token.tokenValue,
+            }
+          }).then((res)=> {
             if (res.data.code === 200) {
               this.roles=res.data.data;
               // 修改editedIndex来说明现在是修改
@@ -396,7 +416,13 @@ export default {
 
     // 删除页面的删除按钮
     deleteItemConfirm () {
-      this.$axios.post("/admin/delete/"+this.editedItem.id).then((res)=>{
+      this.$axios.post("/admin/delete/"+this.editedItem.id,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           this.$message.success(res.data.message);
         }
@@ -453,7 +479,13 @@ export default {
           formData.append('faculty',this.editedItem.faculty)
           formData.append('role',this.editedItem.role)
           //请求
-          this.$axios.post("/admin/add",formData)
+          this.$axios.post("/admin/add",formData,{
+            //加入token
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'token': this.$store.state.token.tokenValue,
+            }
+          })
               .then((res)=>{
                 // 如果后端成功
                 if (res.data.code===200){
@@ -494,7 +526,13 @@ export default {
         if (validate === true) {
           // 如果是默认的值空，表示没有修改图片
           if (this.img==='' || this.img===null){
-            this.$axios.post("/admin/edit", this.editedItem).then((res) => {
+            this.$axios.post("/admin/edit", this.editedItem,{
+              //加入token
+              headers: {
+                'Content-Type': 'application/json',
+                'token': this.$store.state.token.tokenValue,
+              }
+            }).then((res) => {
               // 如果成功
               if (res.data.code === 200) {
                 this.$message.success(res.data.message);
@@ -535,7 +573,13 @@ export default {
               formData.append('password',this.editedItem.password)
               formData.append('role',this.editedItem.role)
               formData.append('faculty',this.editedItem.faculty)
-              this.$axios.post("/admin/editAndUpload",formData).then((res)=>{
+              this.$axios.post("/admin/editAndUpload",formData,{
+                //加入token
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'token': this.$store.state.token.tokenValue,
+                }
+              }).then((res)=>{
                 //如果后端提示成功
                 if (res.data.code===200){
                   this.findPage();
@@ -570,7 +614,13 @@ export default {
         pageSize: this.pagination.pageSize,
         user: this.pagination.user
       }
-      this.$axios.post("/admin/findPage",param).then((res)=>{
+      this.$axios.post("/admin/findPage",param,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         // 为，总记录数，数据集合赋值
         this.pagination.total = res.data.data.total;
         this.dataList = res.data.data.rows;

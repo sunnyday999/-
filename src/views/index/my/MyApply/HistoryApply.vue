@@ -56,11 +56,15 @@
         </template>
         <!--会议状态-->
         <template v-slot:item.status="{item}">
-          <v-chip class="elevation-5" label >{{ item.status}}</v-chip>
+          <v-chip  v-if="item.status==='未进行'" class="elevation-5" label >{{ item.status}}</v-chip>
+         <v-chip v-if="item.status==='正在进行'" class="elevation-5" label color="success">{{ item.status}}</v-chip>
+          <v-chip v-if="item.status==='已经结束'" class="elevation-5" label color="primary">{{ item.status}}</v-chip>
         </template>
         <!--审核状态-->
         <template v-slot:item.approvalStatus="{item}">
-          <v-chip class="elevation-5" label >{{ item.approvalStatus}}</v-chip>
+          <v-chip v-if="item.approvalStatus==='未审核'" class="elevation-5" label >{{ item.approvalStatus}}</v-chip>
+          <v-chip v-if="item.approvalStatus==='审核未通过'" class="elevation-5" label color="error" >{{ item.approvalStatus}}</v-chip>
+          <v-chip v-if="item.approvalStatus==='审核通过'" class="elevation-5" label color="success">{{ item.approvalStatus}}</v-chip>
         </template>
         <!--会议简介-->
         <template v-slot:item.info="{item}">

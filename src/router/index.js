@@ -111,20 +111,27 @@ const router = new VueRouter({
 })
 
 export default router;
-// /*每次切换页面的时候就判断下*/
-// router.beforeEach((to,from,next)=>{
-// // 如果是登录页可访问
-//     if (to.name ==='error' || to.name==='login'){
-//         next();
-//     }
-//     // 如果是其他页面,先检测是否有token,没有token则跳转到登录页
-//     let tokenValue = vuex.state.token.tokenValue;
-//     if (tokenValue===undefined || tokenValue===''){
-//         next({
-//             path: '/login'
-//         })
-//     }
-//     //如果有token放行
-//     next()
-// })
+/*每次切换页面的时候就判断下*/
+router.beforeEach((to,from,next)=>{
+    // 如果是登录页可访问
+    if (to.name ==='error' || to.name==='login'){
+        next();
+    }
+    // 如果是其他页面,先检测是否有token,没有token则跳转到登录页
+    let tokenValue = vuex.state.token.tokenValue;
+    if (tokenValue===undefined || tokenValue===''){
+        let store = sessionStorage.getItem("store");
+        if (store===undefined|| store===''){
+            next({
+                path: '/login'
+            })
+        }else {
+            //如果有token放行
+            next()
+        }
+    }else {
+        //如果有token放行
+        next()
+    }
+})
 

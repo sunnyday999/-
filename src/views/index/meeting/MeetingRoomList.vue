@@ -400,7 +400,13 @@ export default {
     showCreateDialog(){
       this.prefixLocation='';
       // 查询学院信息
-      this.$axios.post("/faculty/findAll").then((res)=> {
+      this.$axios.post("/faculty/findAll",null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=> {
         if (res.data.code === 200) {
           this.faculty=res.data.data;
           this.dialog =true;
@@ -436,7 +442,13 @@ export default {
       // 保存此id，说明这个哪个用户
       this.editedItem.id =item.id;
       // 查询学院信息
-      this.$axios.post("/faculty/findAll").then((res)=>{
+      this.$axios.post("/faculty/findAll",null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           //保存信息
           this.faculty = res.data.data;
@@ -470,7 +482,13 @@ export default {
 
     // 删除页面的删除按钮
     deleteItemConfirm () {
-      this.$axios.post("/meetingRoom/delete/"+this.editedItem.id).then((res)=>{
+      this.$axios.post("/meetingRoom/delete/"+this.editedItem.id,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           this.$message.success(res.data.message);
         }
@@ -511,7 +529,13 @@ export default {
           formData.append('info',this.editedItem.info)
           formData.append('name',this.editedItem.faculty.name)
           formData.append('location',this.editedItem.faculty.location)
-          this.$axios.post("/meetingRoom/upload",formData).then((res)=>{
+          this.$axios.post("/meetingRoom/upload",formData,{
+            //加入token
+            headers: {
+              'Content-Type': 'application/json',
+              'token': this.$store.state.token.tokenValue,
+            }
+          }).then((res)=>{
             //如果后端提示成功
             if (res.data.code===200){
               this.findPage();
@@ -536,7 +560,13 @@ export default {
           if (this.img==='' || this.img===null){
             this.saveLoading =true;
             //不带图片的http请求，表示只修改其他信息
-            this.$axios.post("/meetingRoom/edit",this.editedItem).then((res)=>{
+            this.$axios.post("/meetingRoom/edit",this.editedItem,{
+              //加入token
+              headers: {
+                'Content-Type': 'application/json',
+                'token': this.$store.state.token.tokenValue,
+              }
+            }).then((res)=>{
               if (res.data.code===200){
                 this.findPage();
                 this.$message.success(res.data.message);
@@ -572,7 +602,13 @@ export default {
             formData.append('info',this.editedItem.info)
             formData.append('name',this.editedItem.faculty.name)
             formData.append('location',this.editedItem.faculty.location)
-            this.$axios.post("/meetingRoom/editAndUpload",formData).then((res)=>{
+            this.$axios.post("/meetingRoom/editAndUpload",formData,{
+              //加入token
+              headers: {
+                'Content-Type': 'application/json',
+                'token': this.$store.state.token.tokenValue,
+              }
+            }).then((res)=>{
               //如果后端提示成功
               if (res.data.code===200){
                 this.findPage();
@@ -603,7 +639,13 @@ export default {
         pageSize: this.pagination.pageSize,
         meetingRoom: this.pagination.meetingRoom
       }
-      this.$axios.post("/meetingRoom/findPage",param).then((res)=>{
+      this.$axios.post("/meetingRoom/findPage",param,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         // 为，总记录数，数据集合赋值
         this.pagination.total = res.data.total;
         this.dataList = res.data.rows;

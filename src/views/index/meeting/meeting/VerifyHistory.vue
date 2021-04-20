@@ -63,11 +63,15 @@
         </template>
         <!--会议状态-->
         <template v-slot:item.status="{item}">
-          <v-chip class="elevation-5" label >{{ item.status}}</v-chip>
+          <v-chip  v-if="item.status==='未进行'" class="elevation-5" label >{{ item.status}}</v-chip>
+          <v-chip v-if="item.status==='正在进行'" class="elevation-5" label color="success">{{ item.status}}</v-chip>
+          <v-chip v-if="item.status==='已经结束'" class="elevation-5" label color="primary">{{ item.status}}</v-chip>
         </template>
         <!--审核状态-->
         <template v-slot:item.approvalStatus="{item}">
-          <v-chip class="elevation-5" label >{{ item.approvalStatus}}</v-chip>
+          <v-chip v-if="item.approvalStatus==='未审核'" class="elevation-5" label >{{ item.approvalStatus}}</v-chip>
+          <v-chip v-if="item.approvalStatus==='审核未通过'" class="elevation-5" label color="error" >{{ item.approvalStatus}}</v-chip>
+          <v-chip v-if="item.approvalStatus==='审核通过'" class="elevation-5" label color="success">{{ item.approvalStatus}}</v-chip>
         </template>
         <!--会议简介-->
         <template v-slot:item.info="{item}">
@@ -90,14 +94,12 @@
           @input="handleCurrentPage"
       ></v-pagination>
 
-      <!--审核弹出框-->
+      <!--弹出框-->
       <v-dialog v-model="dialog"  transition="dialog-top-transition">
-        <!--新建页面的title-->
         <v-card>
           <v-toolbar class="text-h6" color="success" dark>
             <v-spacer/>会议审核<v-spacer/>
           </v-toolbar>
-          <!--新建页面的内容-->
           <v-card-text>
             <v-container>
               <div class="text-h6">会议信息</div>
@@ -124,7 +126,7 @@
                     <td>{{selectMeeting.start}}</td>
                     <td>{{selectMeeting.end}}</td>
                     <td> <v-chip class="elevation-5" label >{{selectMeeting.status}}</v-chip></td>
-                    <td>{{selectMeeting.sponsor.username}}</td>
+                    <td v-if="selectMeeting.sponsor!==undefined">{{selectMeeting.sponsor.username}}</td>
                     <td>{{selectMeeting.sponsorTime}}</td>
                     <td> <v-chip class="elevation-5" label >{{selectMeeting.approvalStatus}}</v-chip></td>
                     <td>{{selectMeeting.info}}</td>
@@ -160,8 +162,8 @@
                     </td>
                     <td>{{meetingRoom.capacity}}</td>
                     <td>{{meetingRoom.info}}</td>
-                    <td>{{meetingRoom.faculty.name}}</td>
-                    <td>{{meetingRoom.faculty.location}}</td>
+                    <td v-if="meetingRoom.faculty!==undefined">{{meetingRoom.faculty.name}}</td>
+                    <td v-if="meetingRoom.faculty!==undefined">{{meetingRoom.faculty.location}}</td>
                   </tr>
                   </tbody>
                 </template>
@@ -191,10 +193,10 @@
                       </v-avatar>
                     </td>
                     <td>{{ item.username }}</td>
-                    <td>
+                    <td v-if=" item.faculty!==undefined">
                       <v-chip class="elevation-5" color="success" label>{{ item.faculty.name }}</v-chip>
                     </td>
-                    <td>
+                    <td  v-if=" item.role!==undefined">
                       <v-chip class="elevation-5" color="warning" label v-if="item.admin===true">
                         {{ item.role.name }}
                       </v-chip>
@@ -328,7 +330,13 @@ export default {
         pageSize: this.pagination.pageSize,
         meeting: this.pagination.meeting
       }
-      this.$axios.post("/meeting/findPageByVerify",param).then((res)=>{
+      this.$axios.post("/meeting/findPageByVerifyHistory",param,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         // 为，总记录数，数据集合赋值
         this.pagination.total = res.data.data.total;
         this.dataList = res.data.data.rows;

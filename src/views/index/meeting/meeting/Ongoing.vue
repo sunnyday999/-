@@ -63,11 +63,11 @@
         </template>
         <!--会议状态-->
         <template v-slot:item.status="{item}">
-          <v-chip class="elevation-5" label >{{ item.status}}</v-chip>
+          <v-chip class="elevation-5" label  color="success">{{ item.status}}</v-chip>
         </template>
         <!--审核状态-->
         <template v-slot:item.approvalStatus="{item}">
-          <v-chip class="elevation-5" label >{{ item.approvalStatus}}</v-chip>
+          <v-chip class="elevation-5" label color="success" >{{ item.approvalStatus}}</v-chip>
         </template>
         <!--会议简介-->
         <template v-slot:item.info="{item}">
@@ -124,7 +124,7 @@
                     <td>{{selectMeeting.start}}</td>
                     <td>{{selectMeeting.end}}</td>
                     <td> <v-chip class="elevation-5" label >{{selectMeeting.status}}</v-chip></td>
-                    <td>{{selectMeeting.sponsor.username}}</td>
+                    <td v-if="selectMeeting.sponsor!==undefined">{{selectMeeting.sponsor.username}}</td>
                     <td>{{selectMeeting.sponsorTime}}</td>
                     <td> <v-chip class="elevation-5" label >{{selectMeeting.approvalStatus}}</v-chip></td>
                     <td>{{selectMeeting.info}}</td>
@@ -160,8 +160,8 @@
                     </td>
                     <td>{{meetingRoom.capacity}}</td>
                     <td>{{meetingRoom.info}}</td>
-                    <td>{{meetingRoom.faculty.name}}</td>
-                    <td>{{meetingRoom.faculty.location}}</td>
+                    <td v-if="meetingRoom.faculty!==undefined">{{meetingRoom.faculty.name}}</td>
+                    <td v-if="meetingRoom.faculty!==undefined">{{meetingRoom.faculty.location}}</td>
                   </tr>
                   </tbody>
                 </template>
@@ -191,10 +191,10 @@
                       </v-avatar>
                     </td>
                     <td>{{ item.username }}</td>
-                    <td>
+                    <td v-if="item.faculty!==undefined">
                       <v-chip class="elevation-5" color="success" label>{{ item.faculty.name }}</v-chip>
                     </td>
-                    <td>
+                    <td v-if="item.role!==undefined">
                       <v-chip class="elevation-5" color="warning" label v-if="item.admin===true">
                         {{ item.role.name }}
                       </v-chip>
@@ -328,7 +328,13 @@ export default {
         pageSize: this.pagination.pageSize,
         meeting: this.pagination.meeting
       }
-      this.$axios.post("/meeting/findPageByVerify",param).then((res)=>{
+      this.$axios.post("/meeting/findPageByOngoing",param,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         // 为，总记录数，数据集合赋值
         this.pagination.total = res.data.data.total;
         this.dataList = res.data.data.rows;

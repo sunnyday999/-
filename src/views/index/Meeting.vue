@@ -25,17 +25,7 @@ export default {
   name: "Meeting",
   data(){
     return {
-
     }
-  },
-  created() {
-
-  },
-  methods:{
   },
 }
 </script>
-
-<style scoped>
-
-</style>

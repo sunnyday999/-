@@ -7,27 +7,27 @@
       <v-spacer/>
       <!--消息盒子-->
       <v-menu   offset-y
-                :close-on-content-click="false">
+                :close-on-content-click="true">
         <!--消息盒子的按钮-->
         <template v-slot:activator="{ on, attrs }">
           <v-btn icon small large
                  v-bind="attrs"
                  v-on="on"
                  class="mr-5">
-            <v-badge dot left color="pink">
+            <v-badge v-model="badge"  left color="pink" :content="unreadMessageNum">
               <i class="fa fa-bell-o fa-lg"></i>
             </v-badge>
           </v-btn>
         </template>
         <!--点击要展开的数据-->
-        <v-list width="400">
+        <v-list width="300">
           <!--顶部按钮-->
           <v-list-item>
-            <v-btn small elevation="0">查看已读消息({{readMessageNum}})</v-btn>
+            <v-btn elevation="0" @click="gotoMessage">查看全部消息</v-btn>
             <v-spacer/>
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
-                <v-btn small large icon>
+                <v-btn small large icon @click="allRead">
                   <i v-bind="attrs" v-on="on" class="fa fa-envelope-open"></i>
                 </v-btn>
               </template>
@@ -37,15 +37,15 @@
           <v-divider/>
           <!--下部分消息内容-->
           <v-virtual-scroll
-              :items="items"
+              :items="message"
               height="300"
               item-height="64"
           >
             <template v-slot:default="{ item }">
-              <v-list-item :key="item">
+              <v-list-item :key="item.id">
                 <v-list-item-content>
-                  <v-list-item-title>
-                    User Database Record <strong>ID {{ item }}</strong>
+                  <v-list-item-title @click="messageDialog(item)" class="my">
+                    {{item.content.substring(0,10)+`....`}}
                   </v-list-item-title>
                 </v-list-item-content>
                 <v-tooltip bottom>
@@ -183,6 +183,23 @@
       </v-list>
     </v-navigation-drawer>
 
+    <!--消息内容-->
+    <v-dialog
+        v-model="snackbar"
+        transition="dialog-top-transition"
+        max-width="600">
+      <v-card>
+        <v-card-text class="subtitle-1 black--text">
+          <v-container>
+            {{selectMessage.content}}
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer/>
+          时间：<v-chip color="success" label>{{selectMessage.sendTime}}</v-chip>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!--主页-->
     <v-main app>
@@ -203,18 +220,23 @@ export default {
       mini: false,     // 默认不是mini
       permanent:true,  // 默认是侧栏展开
       title: "首页", // 默认首页
-      avatar: '',
+      avatar: 'header.jpg',
       menuList: [],
       // 用户消息相关
-      readMessageNum: 1,
-      unreadMessageNum: 10,
+      unreadMessageNum: 0,
       barColor: 'rgba(0, 0, 0, 0.7), rgba(0, 0, 0,0.7)',
-      items: [],
       // 用户导航相关
       user_menu: [
         { title: '我的信息',icon: 'fa fa-home'},
         { title: '退出' ,icon: 'fa fa-home'},
       ],
+      //消息列表
+      message: [],
+      //选择的消息对象
+      selectMessage: '',
+      //消息
+      snackbar: false,
+      badge: false,
     };
   },
   created() {
@@ -227,8 +249,41 @@ export default {
       sessionStorage.setItem("store",JSON.stringify(this.$store.state))
     })
     this.initMenu();
+    this.findAllMessage();
   },
   methods:{
+    gotoMessage(){
+      //路由到登录页面
+      this.$router.push("/my/myMessage")
+    },
+    //全部已读
+    allRead(){
+      this.$axios.post("/message/haveReadAll/"+this.$store.state.username,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.findAllMessage();
+        }
+      })
+    },
+    //消息详情
+    messageDialog(item){
+      //修改此消息为已读消息
+      this.$axios.post("/message/haveRead/"+item.id,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      })
+      this.findAllMessage();
+      this.selectMessage = item;
+      this.snackbar = true;
+    },
     initMenu(){
       // 获取此用户对应的菜单信息
       this.$axios.post("/menu/findByUsername/"+this.$store.state.username,null,{
@@ -297,9 +352,36 @@ export default {
         this.$message.error("请检查网络问题");
       });
     },
+    //查询所有未读消息
+    findAllMessage(){
+      this.$axios.post("/message/findAllReadMessage/"+this.$store.state.username,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.message = res.data.data;
+          this.unreadMessageNum = this.message.length;
+          if (this.unreadMessageNum===0){
+            this.badge = false;
+          }else {
+            this.badge = true;
+          }
+        }else {
+          this.$message.error(res.data.message);
+        }
+      }).catch(()=>{
+        this.$message.error("请检查网络问题");
+      })
+    }
   },
 }
 </script>
 
 <style scoped>
+.my:hover{
+  cursor: pointer;
+}
 </style>

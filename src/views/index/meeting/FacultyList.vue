@@ -199,7 +199,13 @@ export default {
       if (validate === true) {
         // 如果是新建的页面
         if (this.editedIndex===-1) {
-          this.$axios.post("/faculty/add",this.editedItem).then((res)=>{
+          this.$axios.post("/faculty/add",this.editedItem,{
+            //加入token
+            headers: {
+              'Content-Type': 'application/json',
+              'token': this.$store.state.token.tokenValue,
+            }
+          }).then((res)=>{
             if (res.data.code===200){
               this.$message.success(res.data.data)
               this.findPage();
@@ -215,7 +221,13 @@ export default {
         }
         //如果是修改
         else {
-          this.$axios.post("/faculty/edit",this.editedItem).then((res)=>{
+          this.$axios.post("/faculty/edit",this.editedItem,{
+            //加入token
+            headers: {
+              'Content-Type': 'application/json',
+              'token': this.$store.state.token.tokenValue,
+            }
+          }).then((res)=>{
             if (res.data.code===200){
               this.$message.success(res.data.data)
               this.findPage();
@@ -257,7 +269,13 @@ export default {
     },
     // 删除页面的删除按钮
     deleteItemConfirm () {
-      this.$axios.post("/faculty/delete",{id:this.editedItem.id}).then((res)=>{
+      this.$axios.post("/faculty/delete",{id:this.editedItem.id},{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           this.$message.success(res.data.data);
         }
@@ -288,7 +306,13 @@ export default {
       }else if(param.queryString==='否'){
         param.queryString=false;
       }
-      this.$axios.post("/faculty/findPage",param).then((res)=>{
+      this.$axios.post("/faculty/findPage",param,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         // 为，总记录数，数据集合赋值
         this.pagination.total = res.data.total;
         this.dataList = res.data.rows;

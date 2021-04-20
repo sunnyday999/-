@@ -15,7 +15,6 @@
             <v-spacer></v-spacer>
           </v-toolbar>
         </v-card-title>
-        <!--新建页面的内容-->
         <v-card-text>
           <v-container>
             <v-text-field
@@ -291,6 +290,7 @@
 <script>
 export default {
   name: "Apply",
+
   data(){
     return{
       //三个弹窗
@@ -332,7 +332,7 @@ export default {
         length: len => v => (v || '').length <= len || `最大长度为: ${len}`,
         required: v => !!v || '不能为空',
       },
-      allowedHours: v => v>=8 && v<23,
+      allowedHours: v => v>=8 && v<24,
       menu1: false,
       menu2: false,
       menu3: false,
@@ -358,7 +358,13 @@ export default {
   methods:{
     // 查询学院信息
     findFaculty(){
-      this.$axios.post("/faculty/findAll").then((res)=>{
+      this.$axios.post("/faculty/findAll",null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           this.faculty=res.data.data;
         }else{
@@ -377,7 +383,13 @@ export default {
       this.selectFaculty = faculty1[0];
       let id = faculty1[0].id;
       //查询会议室
-      this.$axios.post("/meetingRoom/findByFacultyId/"+id).then((res)=>{
+      this.$axios.post("/meetingRoom/findByFacultyId/"+id,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           this.location=res.data.data;
         }else{
@@ -388,7 +400,13 @@ export default {
       });
 
       // 查询会议室人员
-      this.$axios.post("/user/findByFacultyId/"+id).then((res)=>{
+      this.$axios.post("/user/findByFacultyId/"+id,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           this.members=res.data.data;
         }else{
@@ -445,8 +463,13 @@ export default {
           username: this.$store.state.username,
         },
       }
-      console.log(meeting);
-      this.$axios.post("/meeting/add",meeting).then((res)=>{
+      this.$axios.post("/meeting/add",meeting,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
         if (res.data.code===200){
           this.$message.success(res.data.message);
           this.close();

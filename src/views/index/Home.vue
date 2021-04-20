@@ -35,17 +35,21 @@
             <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
           </v-toolbar>
           <v-card-subtitle class="subtitle-1">
-            会议时间：
+            会议时间： <span class="black--text">{{selectedEvent.start}}</span>----<span class="black--text">{{selectedEvent.end}}</span>
             <span></span>
           </v-card-subtitle>
-          <v-card-text class="subtitle-1">
-            会议地点：
-            <span v-html="selectedEvent.location"></span>
+          <v-card-text class="subtitle-1" v-if=" selectedEvent.meetingRoom!==undefined && selectedEvent.meetingRoom.faculty!==undefined ">
+            <div v-if="selectedEvent.meetingRoom.faculty.location===selectedEvent.meetingRoom.room">会议地点：{{selectedEvent.meetingRoom.room}}</div>
+            <div v-else>会议地点：{{selectedEvent.meetingRoom.faculty.location}}-{{selectedEvent.meetingRoom.room}}</div>
           </v-card-text>
+          <v-card-actions>
+            <v-spacer/>
+            <v-btn color="success" @click="gotoFuture()">查看详情</v-btn>
+            <v-spacer/>
+          </v-card-actions>
         </v-card>
       </v-menu>
     </v-sheet>
-
   </div>
 </template>
 
@@ -58,25 +62,7 @@ export default {
       value: '',
       time: '',
       extend: '',
-      events: [
-        {
-          name: '重要会议',
-          start: '2021-03-19 20:00',
-          end: '2021-03-19 21:00',
-          location: 'A06-201'
-        },
-        {
-          name: '院系内会议',
-          start: '2021-03-19 14:00',
-          end: '2021-03-19 16:00',
-          location: 'A06-401'
-        },
-        {
-          name: '重要会议',
-          start: '2021-03-18 20:00',
-          end: '2021-03-18 21:00',
-          location: 'A02'
-        },],
+      events: [],
       selectedEvent: {},
       selectedElement: null,
       selectedOpen: false,
@@ -85,6 +71,7 @@ export default {
   },
   created() {
     this.init();
+    this.findAll();
   },
   methods:{
     init(){
@@ -132,6 +119,30 @@ export default {
       }
       nativeEvent.stopPropagation()
     },
+
+    //获取全部要参加的会议
+    findAll(){
+      this.$axios.post("/meeting/findAllFutureByUsername/"+this.$store.state.username,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code ===200){
+          this.events = res.data.data
+        }else {
+          this.$message.error(res.data.message);
+        }
+      }).catch(()=>{
+        this.$message.error("请求发送失败，请检查网络")
+      })
+    },
+    //
+    gotoFuture(){
+      //路由到登录页面
+      this.$router.push("/my/myMeeting/future")
+    }
   },
 }
 </script>
