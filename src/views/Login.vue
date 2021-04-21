@@ -131,7 +131,15 @@ export default {
             this.$message.error("登录失败,网络问题")
           })
     }
-  }
+  },
+  created() {
+    //删除过期token
+    this.$store.commit("setTokenName",'');
+    this.$store.commit("setTokenValue",'');
+    this.$store.commit("setUsername", '');
+    //清空sessionStorage
+    sessionStorage.clear();
+  },
 }
 </script>
 

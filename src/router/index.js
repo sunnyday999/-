@@ -31,16 +31,17 @@ import HistoryApply from "@/views/index/my/MyApply/HistoryApply";
 import MyMeeting from "@/views/index/my/MyMeeting";
 import History from "@/views/index/my/myMeeting/History";
 import Future from "@/views/index/my/myMeeting/Future";
-
-
+//error
+import Error from "@/views/index/Error";
+//message
+import Message from "@/views/index/Message";
 
 import vuex from "@/vuex/vuex";
 import axios from "axios";
 import * as path from "path";
 
-//router
-import Message from "@/views/index/Message";
 
+import  msg from "@/components/message/index"
 Vue.use(VueRouter)
 
 const routes = [
@@ -104,6 +105,11 @@ const routes = [
         name: 'login',
         component: Login
     },
+    {
+        path: '/*',
+        name: 'error',
+        component: Error
+    },
 ]
 
 const router = new VueRouter({
@@ -120,15 +126,10 @@ router.beforeEach((to,from,next)=>{
     // 如果是其他页面,先检测是否有token,没有token则跳转到登录页
     let tokenValue = vuex.state.token.tokenValue;
     if (tokenValue===undefined || tokenValue===''){
-        let store = sessionStorage.getItem("store");
-        if (store===undefined|| store===''){
-            next({
-                path: '/login'
-            })
-        }else {
-            //如果有token放行
-            next()
-        }
+        next({
+            path: '/login'
+        })
+        msg.error('请先登录')
     }else {
         //如果有token放行
         next()
