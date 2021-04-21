@@ -244,6 +244,17 @@ export default {
     if (sessionStorage.getItem("store") ) {
       this.$store.replaceState(Object.assign({}, this.$store.state,JSON.parse(sessionStorage.getItem("store"))))
     }
+/*    let store = sessionStorage.getItem("store");
+    let json = eval("("+store+")");
+    console.log("json:"+json);
+    console.log(this.$store.state);*/
+    /*    if (json===null){
+          this.$router.push("/login")
+          this.$message.error("请先登录");
+        }else if (json.token.tokenValue ===''){
+          this.$router.push("/login")
+          this.$message.error("请先登录");
+        }*/
     //在页面刷新时将vuex里的信息保存到sessionStorage里
     window.addEventListener("beforeunload",()=>{
       sessionStorage.setItem("store",JSON.stringify(this.$store.state))

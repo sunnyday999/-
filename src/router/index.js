@@ -126,13 +126,26 @@ router.beforeEach((to,from,next)=>{
     // 如果是其他页面,先检测是否有token,没有token则跳转到登录页
     let tokenValue = vuex.state.token.tokenValue;
     if (tokenValue===undefined || tokenValue===''){
-        next({
-            path: '/login'
-        })
-        msg.error('请先登录')
-    }else {
+        //如果sessionStorage有值
+        if (sessionStorage.getItem("store")) {
+            let store = sessionStorage.getItem("store");
+            let json = eval("("+store+")");
+            if (json.token.tokenValue ===''){
+                next({path: '/login'})
+                msg.error('请先登录')
+            }else {
+                //如果有token放行
+                next()
+            }
+        }else {
+            next({path: '/login'})
+            msg.error('请先登录')
+        }
+    }
+    else {
         //如果有token放行
         next()
     }
+
 })
 
