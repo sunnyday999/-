@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-axios.defaults.baseURL = "http://localhost:9000/";
+axios.defaults.baseURL = "http://localhost:9000";
 
 const service = axios.create({
   timeout: 40000,

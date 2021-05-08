@@ -1,55 +1,90 @@
 <template>
   <div  style="background-color: #EEEEEE">
-    <v-toolbar elevation="0" dense style="background-color: #EEEEEE">
-      <v-spacer/>
-      <div class=" mb-3 subtitle-1">
-        {{extend}},今天是<strong>{{time}}</strong>
-      </div>
-      <v-spacer/>
-    </v-toolbar>
-    <!--日历组件-->
-    <v-sheet height="500">
-      <v-calendar
-          color="success"
-          locale="china"
-          ref="calendar"
-          v-model="value"
-          :type="type"
-          first-time="上午8时"
-          interval-count="16"
-          @click:event="showEvent"
-          :events="events"
-          :event-color="getEventColor"
-          :event-overlap-threshold="30"
-      ></v-calendar>
-      <!--事件点开展开界面-->
-      <v-menu
-          offset-y
-          transition="fab-transition"
-          v-model="selectedOpen"
-          :close-on-content-click="false"
-          :activator="selectedElement"
-      >
-        <v-card color="grey lighten-4" min-width="350px" flat>
-          <v-toolbar :color="selectedEvent.color" dark>
-            <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
-          </v-toolbar>
-          <v-card-subtitle class="subtitle-1">
-            会议时间： <span class="black--text">{{selectedEvent.start}}</span>----<span class="black--text">{{selectedEvent.end}}</span>
-            <span></span>
-          </v-card-subtitle>
-          <v-card-text class="subtitle-1" v-if=" selectedEvent.meetingRoom!==undefined && selectedEvent.meetingRoom.faculty!==undefined ">
-            <div v-if="selectedEvent.meetingRoom.faculty.location===selectedEvent.meetingRoom.room">会议地点：{{selectedEvent.meetingRoom.room}}</div>
-            <div v-else>会议地点：{{selectedEvent.meetingRoom.faculty.location}}-{{selectedEvent.meetingRoom.room}}</div>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer/>
-            <v-btn color="success" @click="gotoFuture()">查看详情</v-btn>
-            <v-spacer/>
-          </v-card-actions>
-        </v-card>
-      </v-menu>
-    </v-sheet>
+    <div>
+      <v-sheet
+          tile
+          height="54"
+          class="d-flex">
+        <v-btn
+            icon
+            class="ma-2"
+            @click="$refs.calendar.prev()">
+          <v-icon>mdi-chevron-left</v-icon>
+        </v-btn>
+        <v-btn
+            icon
+            class="ma-2"
+            @click="$refs.calendar.next()">
+          <v-icon>mdi-chevron-right</v-icon>
+        </v-btn>
+        <v-btn
+            class="ma-2"
+            color="success"
+            @click="setToday">
+          今天
+        </v-btn>
+        <v-spacer/>
+        <div class=" ma-2 subtitle-1">
+          {{extend}},今天是<strong>{{time}}</strong>
+        </div>
+        <v-spacer/>
+        <v-select
+            color="success"
+            item-color="success"
+            v-model="type"
+            :items="types"
+            dense
+            outlined
+            hide-details
+            class="ma-2"
+            label="类型"
+        ></v-select>
+
+      </v-sheet>
+      <!--日历组件-->
+      <v-sheet height="600">
+        <v-calendar
+            color="success"
+            locale="china"
+            ref="calendar"
+            v-model="value"
+            :type="type"
+            first-time="上午8时"
+            interval-count="16"
+            @click:event="showEvent"
+            :events="events"
+            :event-color="getEventColor"
+            :event-overlap-threshold="30"
+        ></v-calendar>
+        <!--事件点开展开界面-->
+        <v-menu
+            offset-y
+            transition="fab-transition"
+            v-model="selectedOpen"
+            :close-on-content-click="false"
+            :activator="selectedElement"
+        >
+          <v-card color="grey lighten-4" min-width="350px" flat>
+            <v-toolbar :color="selectedEvent.color" dark>
+              <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+            </v-toolbar>
+            <v-card-subtitle class="subtitle-1">
+              会议时间： <span class="black--text">{{selectedEvent.start}}</span>----<span class="black--text">{{selectedEvent.end}}</span>
+              <span></span>
+            </v-card-subtitle>
+            <v-card-text class="subtitle-1" v-if=" selectedEvent.meetingRoom!==undefined && selectedEvent.meetingRoom.faculty!==undefined ">
+              <div v-if="selectedEvent.meetingRoom.faculty.location===selectedEvent.meetingRoom.room">会议地点：{{selectedEvent.meetingRoom.room}}</div>
+              <div v-else>会议地点：{{selectedEvent.meetingRoom.faculty.location}}-{{selectedEvent.meetingRoom.room}}</div>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer/>
+              <v-btn color="success" @click="gotoFuture()">查看详情</v-btn>
+              <v-spacer/>
+            </v-card-actions>
+          </v-card>
+        </v-menu>
+      </v-sheet>
+    </div>
   </div>
 </template>
 
@@ -59,6 +94,7 @@ export default {
   data(){
     return{
       type: 'month',
+      types: ['month', 'week', 'day', '4day'],
       value: '',
       time: '',
       extend: '',
@@ -66,7 +102,7 @@ export default {
       selectedEvent: {},
       selectedElement: null,
       selectedOpen: false,
-      colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange','purple','teal' ],
+      colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange','purple','teal','light-green','brown'],
     };
   },
   created() {
@@ -74,6 +110,9 @@ export default {
     this.findAll();
   },
   methods:{
+    setToday () {
+      this.value = ''
+    },
     init(){
       let time =  new Date();
       let year = time.getFullYear()+'年';
@@ -95,7 +134,7 @@ export default {
     },
     // 获取设置事件的颜色
     getEventColor (event) {
-      event.color=this.colors[event.start.substring(8,10)%8];
+      event.color=this.colors[event.start.substring(8,10)%10];
       return event.color;
     },
 

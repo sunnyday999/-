@@ -1,12 +1,13 @@
 <template>
   <v-app style="background-color: #EEEEEE">
     <!--顶部导航-->
-    <v-app-bar app flat hide-on-scroll  absolute>
+    <v-app-bar app flat   absolute>
       <v-app-bar-nav-icon @click="permanent=!permanent;mini=!mini"/>
       <v-list-item-title class="body-1 ml-3">{{ title }}</v-list-item-title>
       <v-spacer/>
       <!--消息盒子-->
       <v-menu   offset-y
+                transition="slide-y-transition"
                 :close-on-content-click="true">
         <!--消息盒子的按钮-->
         <template v-slot:activator="{ on, attrs }">
@@ -42,23 +43,26 @@
               item-height="64"
           >
             <template v-slot:default="{ item }">
-              <v-list-item :key="item.id">
-                <v-list-item-content>
-                  <v-list-item-title @click="messageDialog(item)" class="my">
-                    {{item.content.substring(0,10)+`....`}}
-                  </v-list-item-title>
-                </v-list-item-content>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn small large icon>
-                      <i v-bind="attrs" v-on="on" class="fa fa-envelope-open"></i>
-                    </v-btn>
-                  </template>
-                  <span>标记为已读</span>
-                </v-tooltip>
-              </v-list-item>
+              <v-list dense>
+                <v-list-item-group color="success">
+                  <v-list-item :key="item.id">
+                    <v-list-item-content>
+                      <v-list-item-title @click="messageDialog(item)">
+                        {{item.content.substring(0,10)+`....`}}
+                      </v-list-item-title>
+                    </v-list-item-content>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn small large icon>
+                          <i v-bind="attrs" v-on="on" class="fa fa-envelope-open" @click="haveRead(item)"></i>
+                        </v-btn>
+                      </template>
+                      <span>标记为已读</span>
+                    </v-tooltip>
+                  </v-list-item>
+                </v-list-item-group>
 
-              <v-divider></v-divider>
+              </v-list>
             </template>
           </v-virtual-scroll>
         </v-list>
@@ -244,17 +248,6 @@ export default {
     if (sessionStorage.getItem("store") ) {
       this.$store.replaceState(Object.assign({}, this.$store.state,JSON.parse(sessionStorage.getItem("store"))))
     }
-/*    let store = sessionStorage.getItem("store");
-    let json = eval("("+store+")");
-    console.log("json:"+json);
-    console.log(this.$store.state);*/
-    /*    if (json===null){
-          this.$router.push("/login")
-          this.$message.error("请先登录");
-        }else if (json.token.tokenValue ===''){
-          this.$router.push("/login")
-          this.$message.error("请先登录");
-        }*/
     //在页面刷新时将vuex里的信息保存到sessionStorage里
     window.addEventListener("beforeunload",()=>{
       sessionStorage.setItem("store",JSON.stringify(this.$store.state))
@@ -294,6 +287,16 @@ export default {
       this.findAllMessage();
       this.selectMessage = item;
       this.snackbar = true;
+    },
+    haveRead(item){
+      this.$axios.post("/message/haveRead/"+item.id,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      })
+      this.findAllMessage();
     },
     initMenu(){
       // 获取此用户对应的菜单信息
