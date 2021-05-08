@@ -2,6 +2,8 @@
   <v-app>
     <div class="background">
       <div class="color">
+        <v-menu  transition="scroll-y-transition">
+        </v-menu>
         <v-card class="login">
           <!--顶部logo-->
           <v-card class="white--text success mycard text-center mb-5 pa-7 elevation-5">
@@ -32,10 +34,10 @@
             <v-btn block color="success" class="mt-3" @click="vuetify">登录</v-btn>
             <!--滑动拼图验证组件-->
             <Verify @success="success"
-                    :mode="'pop'"
-                    :captchaType="'blockPuzzle'"
-                    :imgSize="{ width: '330px', height: '155px' }"
-                    ref="verify"
+            :mode="'pop'"
+            :captchaType="'blockPuzzle'"
+            :imgSize="{ width: '330px', height: '155px' }"
+            ref="verify"
             ></Verify>
           </v-container>
         </v-card>
