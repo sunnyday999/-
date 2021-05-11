@@ -370,8 +370,6 @@ export default {
         }else{
           this.$message.error("查询学院信息失败");
         }
-      }).catch(()=>{
-        this.$message.error("请求发送失败，请检查网络");
       })
     },
     //学院框改变的时候查询
@@ -395,9 +393,7 @@ export default {
         }else{
           this.$message.error("查询会议室失败");
         }
-      }).catch(()=>{
-        this.$message.error("请求发送失败，请检查网络");
-      });
+      })
 
       // 查询会议室人员
       this.$axios.post("/user/findByFacultyId/"+id,null,{
@@ -412,9 +408,7 @@ export default {
         }else{
           this.$message.error("查询会人员失败");
         }
-      }).catch(()=>{
-        this.$message.error("请求发送失败，请检查网络");
-      });
+      })
     },
     //计算会议室最大人员
     countCapacity(){
@@ -477,14 +471,10 @@ export default {
         else{
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("发送失败,请检查网络");
       }).finally(()=>{
         this.saveLoading =false;
       })
     },
-
-
     //重置表单
     close () {
       this.$nextTick(()=>{

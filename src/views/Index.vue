@@ -312,9 +312,7 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("获取用户菜单失败");
-      });
+      })
       //获取用户头像信息
       this.$axios.post("/user/findAvatarByUsername/"+this.$store.state.username,null,{
         //加入token
@@ -329,9 +327,7 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("获取用户头像失败");
-      });
+      })
     },
     //我的信息
     myInfo(){
@@ -361,10 +357,7 @@ export default {
         else {
           this.$message.error(res.data.message);
         }
-
-      }).catch(()=>{
-        this.$message.error("请检查网络问题");
-      });
+      })
     },
     //查询所有未读消息
     findAllMessage(){
@@ -386,8 +379,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("请检查网络问题");
       })
     }
   },

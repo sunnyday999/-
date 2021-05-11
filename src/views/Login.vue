@@ -120,13 +120,6 @@ export default {
               //跳转页面
               this.$router.push("/home")
             }
-            // 密码账号有问题
-            else{
-              this.$message.error("账号或密码错误，登录失败")
-            }
-          })
-          .catch(()=>{
-            this.$message.error("登录失败,网络问题")
           })
     }
   },

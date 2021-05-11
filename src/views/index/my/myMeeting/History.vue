@@ -342,8 +342,6 @@ export default {
         this.dataList = res.data.data.rows;
         // 总页码赋值
         this.pageCount =Math.ceil(this.pagination.total/this.pagination.pageSize);
-      }).catch(()=>{
-        this.$message.error("分页请求发送失败，请检查网络")
       })
     },
 
@@ -373,8 +371,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询信息失败请检查网络");
       })
       //查询此会议人员信息
       this.$axios.post("/user/findByMeetingId/"+item.id,null,{
@@ -389,8 +385,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询信息失败请检查网络");
       })
       this.dialog = true;
     },

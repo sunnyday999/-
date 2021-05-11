@@ -47,8 +47,8 @@
         </template>
         <!--操作的按钮-->
         <template v-slot:item.actions="{ item }">
-          <v-btn small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
-          <v-btn small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
+          <v-btn v-if="item.code!=='SuperAdmin'" small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
+          <v-btn v-if="item.code!=='SuperAdmin'" small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
         </template>
       </v-data-table>
 
@@ -392,8 +392,6 @@ export default {
         this.dataList = res.data.data.rows;
         // 总页码赋值
         this.pageCount =Math.ceil(this.pagination.total/this.pagination.pageSize);
-      }).catch(()=>{
-        this.$message.error("分页请求发送失败，请检查网络")
       })
     },
     // 页码变化

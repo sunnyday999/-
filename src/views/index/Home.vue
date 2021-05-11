@@ -173,8 +173,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("请求发送失败，请检查网络")
       })
     },
     //

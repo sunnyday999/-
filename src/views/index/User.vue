@@ -168,7 +168,8 @@ export default {
           align: 'center',
           class: 'green--text subtitle-1',
           value: 'actions',
-          sortable: false },
+          sortable: false
+        },
       ],
 
       // 分页相关数据

@@ -213,8 +213,6 @@ export default {
             }else {
               this.$message.error(res.data.data)
             }
-          }).catch(()=>{
-            this.$message.error("请求发送失败，请检查网络");
           }).finally(()=>{
             this.saveLoading= false;
           })
@@ -235,8 +233,6 @@ export default {
             }else {
               this.$message.error(res.data.data)
             }
-          }).catch(()=>{
-            this.$message.error("请求发送失败，请检查网络");
           }).finally(()=>{
             this.saveLoading= false;
           })
@@ -282,8 +278,6 @@ export default {
         else {
           this.$message.error(res.data.data);
         }
-      }).catch(()=>{
-        this.$message.error("发送请求失败，请检查网络");
       }).finally(()=>{
         this.findPage()
         this.closeDelete()
@@ -318,8 +312,6 @@ export default {
         this.dataList = res.data.rows;
         // 总页码赋值
         this.pageCount =Math.ceil(this.pagination.total/this.pagination.pageSize);
-      }).catch(()=>{
-        this.$message.error("分页请求发送失败，请检查网络")
       })
     },
     // 页码变化

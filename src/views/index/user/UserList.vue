@@ -81,13 +81,26 @@
         <template v-slot:item.role.name="{ item }">
           <v-chip class="elevation-5" color="warning" label>{{ item.role.name }}</v-chip>
         </template>
+        <!--状态-->
+        <template v-slot:item.status="{ item }">
+          <v-chip v-if="item.status==='在线'" class="elevation-5" color="success" label>{{ item.status }}</v-chip>
+          <v-chip v-if="item.status==='离线'" class="elevation-5" color="primary" label>{{ item.status }}</v-chip>
+          <v-chip v-if="item.status==='封禁中'" class="elevation-5" color="error" label @click="showBanStatusDialog(item)">{{ item.status }}</v-chip>
+        </template>
 
         <!--操作的按钮-->
         <template v-slot:item.actions="{ item }">
-          <div v-if="item.id!==1">
-            <v-btn small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
-            <v-btn small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
-          </div>
+          <v-btn v-if="item.role.code!=='SuperAdmin'" small elevation="5" color="success" class="mr-2" @click="editItem(item)"><i class="fa fa-pencil"></i></v-btn>
+          <v-btn v-if="item.role.code!=='SuperAdmin'" small elevation="5" color="error" @click="deleteItem(item)"><i class="fa fa-times"></i></v-btn>
+        </template>
+
+        <!--用户操作的按钮-->
+        <template v-slot:item.userActions="{ item }">
+          <v-btn v-if="item.status==='在线' && item.role.code!=='SuperAdmin'" small elevation="5" color="primary" class="mr-2" @click="showOfflineDialig(item)">下线</v-btn>
+          <v-btn v-if="item.status!=='在线'" small elevation="5" color="primary" class="mr-2" disabled>下线</v-btn>
+          <v-btn v-if="item.role.code!=='SuperAdmin'" small elevation="5"  class="mr-2"   color="error" @click="showBanDialig(item)">封禁</v-btn>
+          <v-btn v-if="item.role.code!=='SuperAdmin'&&item.status==='封禁中'" small elevation="5" color="success" @click="showUnBanDialog(item)">解封</v-btn>
+          <v-btn v-if="item.role.code!=='SuperAdmin'&&item.status!=='封禁中'" disabled small elevation="5" color="success">解封</v-btn>
         </template>
       </v-data-table>
 
@@ -112,6 +125,103 @@
           <v-spacer></v-spacer>
           <v-btn color="success" elevation="5" @click="closeDelete">取消</v-btn>
           <v-btn color="error" elevation="5"  @click="deleteItemConfirm">删除</v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!--踢人下线的弹出页面-->
+    <v-dialog v-model="dialogOffLine" max-width="300" transition="dialog-top-transition">
+      <v-card>
+        <v-card-title class="subtitle-1">你确定要让此用户强制下线吗?</v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="success" elevation="5" @click="closeOffline">取消</v-btn>
+          <v-btn color="error" elevation="5"  @click="offline">下线</v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!--账号封禁的弹出页面-->
+    <v-form v-model="validBan" ref="banForm">
+      <v-dialog v-model="dialogBan" max-width="500" transition="dialog-top-transition">
+        <v-card>
+          <v-toolbar class="text-h6" color="success" dark>
+            <v-spacer/>账号封禁<v-spacer/>
+          </v-toolbar>
+          <v-card-text>
+            <!--是否永久封禁-->
+            <v-radio-group
+                dense
+                label="选择封禁类型"
+                prepend-icon="mdi-format-list-bulleted-type"
+                v-model="forever" row>
+              <v-radio
+                  color="success"
+                  label="永久封禁"
+                  :value="true"
+              ></v-radio>
+              <v-radio
+                  color="success"
+                  label="自定义时间"
+                  :value="false"
+              ></v-radio>
+            </v-radio-group>
+            <!--自定义封禁时间-->
+            <v-text-field
+                prepend-icon="mdi-calendar-clock"
+                v-if="this.forever===false"
+                label="自定义封禁时间,输入1代表1天"
+                outlined
+                dense
+                color="success"
+                :rules="foreverRules"
+                v-model="banTime"
+            ></v-text-field>
+            <!--是否删除此用户对应的所有待审核的会议-->
+            <v-radio-group
+                dense
+                label="删除待审核会议申请"
+                prepend-icon="mdi-palette-swatch"
+                v-model="deleteMeetingApply" row>
+              <v-radio
+                  color="success"
+                  label="是"
+                  :value="true"
+              ></v-radio>
+              <v-radio
+                  color="success"
+                  label="否"
+                  :value="false"
+              ></v-radio>
+            </v-radio-group>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="success" elevation="5" @click="closeBan">取消</v-btn>
+            <v-btn :disabled="!validBan" color="error" elevation="5"  @click="ban">封禁</v-btn>
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-form>
+    <!--封禁的详情的弹出页-->
+    <v-dialog v-model="dialogStatusBan" max-width="300" transition="dialog-top-transition">
+      <v-card>
+        <v-toolbar class="text-h6" color="success" dark>
+          <v-spacer/>封禁详情<v-spacer/>
+        </v-toolbar>
+        <v-card-subtitle class="mt-5 subtitle-1" v-if="this.userBanTime===-1">该账号是永久封禁</v-card-subtitle>
+        <v-card-subtitle class="mt-5 subtitle-1" v-else>距离解封天数还有： <v-chip label color="success">{{Math.ceil(userBanTime/86400)}}天</v-chip></v-card-subtitle>
+      </v-card>
+    </v-dialog>
+    <!--解封的弹出页面-->
+    <v-dialog v-model="dialogUnBan" max-width="250px"   transition="dialog-top-transition">
+      <v-card>
+        <v-card-title class="subtitle-1">你确定要解封这个用户吗?</v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="success" elevation="5" @click="closeUnBan">取消</v-btn>
+          <v-btn color="error" elevation="5"  @click="unBan">解封</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -199,6 +309,11 @@ export default {
     return{
       // 编辑,或者修改页面的表单是否通过验证
       valid: true,
+      validBan: true,
+      dialogOffLine: false,
+      dialogBan: false,
+      dialogStatusBan: false,
+      dialogUnBan: false,
       // 编辑，新建弹出框是否展示
       dialog: false,
       dialogDelete: false,
@@ -266,11 +381,24 @@ export default {
           class: 'green--text subtitle-1',
           value: 'role.code'
         },
-        { text: '操作',
+        { text: '状态',
+          align: 'center',
+          class: 'green--text subtitle-1',
+          value: 'status',
+          sortable: false
+        },
+        { text: '编辑操作',
           align: 'center',
           class: 'green--text subtitle-1',
           value: 'actions',
-          sortable: false },
+          sortable: false
+        },
+        { text: '账号操作',
+          align: 'center',
+          class: 'green--text subtitle-1',
+          value: 'userActions',
+          sortable: false
+        },
       ],
 
       // 分页相关数据
@@ -305,6 +433,13 @@ export default {
         faculty: '',
         role: '',
       },
+      //封禁时间
+      banTime: 0,
+      //是否永久封禁
+      forever: true,
+      deleteMeetingApply: true,
+      //此用户剩余的时间
+      userBanTime: '',
     };
   },
 
@@ -628,8 +763,6 @@ export default {
         this.dataList = res.data.data.rows;
         // 总页码赋值
         this.pageCount =Math.ceil(this.pagination.total/this.pagination.pageSize);
-      }).catch((res)=>{
-        this.$message.error("分页请求发送失败，请检查网络")
       })
     },
     // 页码变化
@@ -643,6 +776,116 @@ export default {
       this.pagination.user.role = '';
       this.pagination.user.faculty = '';
       this.pagination.user.username = '';
+    },
+    //展开账号下线弹窗
+    showOfflineDialig(item){
+      this.editedItem.id = item.id
+      this.dialogOffLine =true
+    },
+    //取消下线
+    closeOffline(){
+      this.editedItem = Object.assign({}, this.defaultItem)//清空editedItem
+      this.dialogOffLine = false;
+    },
+    //账号下线
+    offline(){
+      this.$axios.put("/user/offline/"+this.editedItem.id,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.$message.success(res.data.message)
+          this.findPage()
+        }else {
+          this.$message.error(res.data.message)
+        }
+      }).finally(()=>{
+        this.editedItem = Object.assign({}, this.defaultItem)//清空editedItem
+        this.dialogOffLine = false;
+      });
+    },
+    //账号封禁弹窗展示
+    showBanDialig(item){
+      this.editedItem.id = item.id
+      this.dialogBan =true
+    },
+    //关闭封禁弹窗
+    closeBan(){
+      this.dialogBan = false
+      this.editedItem.id=''
+      this.forever = true
+      this.banTime= 0
+      this.deleteMeetingApply=true
+    },
+    //封禁
+    ban(){
+      this.$axios.put("/user/ban/"+this.editedItem.id+"/"+this.banTime+"/"+this.forever+"/"+this.deleteMeetingApply,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.$message.success(res.data.message)
+          this.findPage()
+        }else {
+          this.$message.error(res.data.message)
+        }
+      }).finally(()=>{
+        this.editedItem = Object.assign({}, this.defaultItem)//清空editedItem
+        this.dialogBan = false;
+      });
+    },
+    //显示封禁详情弹窗
+    showBanStatusDialog(item){
+      //查询封禁剩余时间
+      this.$axios.get("/user/banTime/"+item.username,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.userBanTime =res.data.data
+          this.dialogStatusBan =true
+        }else {
+          this.$message.error(res.data.message)
+        }
+      })
+    },
+    //展开解封禁弹窗
+    showUnBanDialog(item){
+      this.editedItem.username = item.username
+      this.dialogUnBan =true
+    },
+    //关闭解封弹窗
+    closeUnBan(){
+      this.editedItem.username = ''
+      this.dialogUnBan =false
+    },
+    unBan(){
+      this.$axios.put("/user/unBan/"+this.editedItem.username,null,{
+        //加入token
+        headers: {
+          'Content-Type': 'application/json',
+          'token': this.$store.state.token.tokenValue,
+        }
+      }).then((res)=>{
+        if (res.data.code===200){
+          this.$message.success(res.data.message)
+          this.findPage()
+        }else {
+          this.$message.error(res.data.message)
+        }
+      }).finally(()=>{
+        this.editedItem.username = ''
+        this.dialogUnBan =false
+      })
     }
   },
 

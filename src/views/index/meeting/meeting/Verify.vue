@@ -554,8 +554,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询信息失败请检查网络");
       })
       //查询冲突会议室
       this.$axios.post("/meetingRoom/findByMeetingId/"+item.id,null,{
@@ -570,8 +568,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询信息失败请检查网络");
       })
       this.conflictMeetingRoomDialog=true;
     },
@@ -591,8 +587,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询信息失败请检查网络");
       })
       //查询冲突的人员列表
       this.$axios.post("/user/findByConflict/"+item.id,null,{
@@ -607,8 +601,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询信息失败请检查网络");
       })
       this.conflictUserDialog=true;
     },
@@ -637,8 +629,6 @@ export default {
         this.dataList = res.data.data.rows;
         // 总页码赋值
         this.pageCount =Math.ceil(this.pagination.total/this.pagination.pageSize);
-      }).catch(()=>{
-        this.$message.error("分页请求发送失败，请检查网络")
       })
     },
 
@@ -668,8 +658,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询信息失败请检查网络");
       })
       //查询此会议人员信息
       this.$axios.post("/user/findByMeetingId/"+item.id,null,{
@@ -684,8 +672,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询信息失败请检查网络");
       })
       this.dialog = true;
     },
@@ -705,8 +691,6 @@ export default {
         }else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("审核发送失败，请检查网络")
       }).then(()=>{
         this.passLoading = false;
         this.dialog = false;

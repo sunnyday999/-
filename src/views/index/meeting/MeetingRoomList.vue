@@ -414,8 +414,6 @@ export default {
         else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询院系信息失败请检查网络")
       })
     },
     // 展示图片的弹窗
@@ -466,9 +464,7 @@ export default {
         }else{
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询学院信息失败,请检查网络");
-      });
+      })
     },
 
     // 点击删除按钮
@@ -495,8 +491,6 @@ export default {
         else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("发送请求失败，请检查网络");
       }).finally(()=>{
         this.findPage()
         this.closeDelete()
@@ -549,7 +543,6 @@ export default {
               this.saveLoading =false;
             }
           }).catch(()=>{
-            this.$message.error("请求发送失败，请检查网络");
             this.saveLoading =false;
             this.close();
           })
@@ -578,7 +571,6 @@ export default {
                 this.saveLoading =false;
               }
             }).catch(()=>{
-              this.$message.error("请求发送失败，请检查网络");
               this.saveLoading =false;
               this.close();
             });
@@ -622,7 +614,6 @@ export default {
                 this.saveLoading =false;
               }
             }).catch(()=>{
-              this.$message.error("请求发送失败，请检查网络");
               this.saveLoading =false;
               this.close();
             });
@@ -651,8 +642,6 @@ export default {
         this.dataList = res.data.rows;
         // 总页码赋值
         this.pageCount =Math.ceil(this.pagination.total/this.pagination.pageSize);
-      }).catch(()=>{
-        this.$message.error("分页请求发送失败，请检查网络")
       })
     },
     // 页码变化

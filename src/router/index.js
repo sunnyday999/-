@@ -113,10 +113,11 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  routes
+    routes: routes
 })
 
 export default router;
+
 /*每次切换页面的时候就判断下*/
 router.beforeEach((to,from,next)=>{
     // 如果是登录页可访问
@@ -146,6 +147,7 @@ router.beforeEach((to,from,next)=>{
         //如果有token放行
         next()
     }
-
 })
+
+
 

@@ -8,7 +8,7 @@ import vuetify from './plugins/vuetify';
 
 Vue.config.productionTip = false
 // 引入axios
-import axios from 'axios'
+import axios from './config/axios'
 //引入vuex
 import store from "@/vuex/vuex";
 Vue.prototype.$axios=axios
@@ -21,5 +21,8 @@ new Vue({
   render: h => h(App),
   store,
 }).$mount('#app')
+
+
+
 
 

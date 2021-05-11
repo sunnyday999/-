@@ -135,8 +135,6 @@ export default {
         else {
           this.$message.error(res.data.message);
         }
-      }).catch(() => {
-        this.$message.error("请求发送失败，请检查网络")
       }).finally(() => {
         this.init();
       });
@@ -156,9 +154,7 @@ export default {
         else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询失败,检查网络")
-      });
+      })
       //初始化用户信息
       this.$axios.post("/user/findByUsername/"+this.$store.state.username,null,{
         //加入token
@@ -178,9 +174,7 @@ export default {
         else {
           this.$message.error(res.data.message);
         }
-      }).catch(()=>{
-        this.$message.error("查询失败,检查网络")
-      });
+      })
     },
     //修改
     edit(){
@@ -207,8 +201,6 @@ export default {
           else {
             this.$message.error(res.data.message);
           }
-        }).catch(() => {
-          this.$message.error("请求发送失败，请检查网络")
         }).finally(() => {
           this.init();
           this.saveLoading = false;
